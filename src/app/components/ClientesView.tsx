@@ -18,7 +18,7 @@ export function ClientesView() {
     {
       id: 1,
       nome: "Organic Grade A Coffee Beans",
-      vendedor: "Juliana",
+      vendedor: "Julianaa",
       status: "ativo",
       statusColor: "bg-green-100 text-green-800",
       ultimoContato: "2 dias atrás",
