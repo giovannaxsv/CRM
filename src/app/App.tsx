@@ -3,14 +3,69 @@ import { Header } from "./components/Header";
 import { SidebarNav } from "./components/SidebarNav";
 import { ClientesView } from "./components/ClientesView";
 import { MainMenuView } from "./components/MainMenuView";
+import { NovoClienteView } from "./components/NovoClienteView";
+import { RealizarContatoView } from "./components/RealizarContatoView.tsx";
+import { CotacaoView } from "./components/CotacaoView.tsx";
+import { CalculoMargemView } from "./components/CalculoMargemView.tsx";
 
 export default function App() {
   const [activeView, setActiveView] = useState("main");
+  const [selectedClientId, setSelectedClientId] = useState<
+    number | null
+  >(null);
 
   const renderView = () => {
     switch (activeView) {
       case "clients":
-        return <ClientesView />;
+        return (
+          <ClientesView
+            onNovoClienteClick={() =>
+              setActiveView("new-client")
+            }
+            onOpenRealizarContato={(clientId) => {
+              setSelectedClientId(clientId);
+              setActiveView("realizar-contato");
+            }}
+          />
+        );
+      case "new-client":
+        return (
+          <NovoClienteView
+            onBackToClients={() =>
+              setActiveView("clients")
+            }
+          />
+        );
+      case "realizar-contato":
+        return (
+          <RealizarContatoView
+            clientId={selectedClientId}
+            onBackToClients={() => setActiveView("clients")}
+            onSaveAndCreateOpportunity={() =>
+              setActiveView("cotacao")
+            }
+          />
+        );
+      case "cotacao":
+        return (
+          <CotacaoView
+            clientId={selectedClientId}
+            onBackToContato={() =>
+              setActiveView("realizar-contato")
+            }
+            onBackToClients={() => setActiveView("clients")}
+            onOpenCalculoMargem={() =>
+              setActiveView("calculo-margem")
+            }
+          />
+        );
+      case "calculo-margem":
+        return (
+          <CalculoMargemView
+            clientId={selectedClientId}
+            onBackToCotacao={() => setActiveView("cotacao")}
+          />
+        );
       case "main":
         return <MainMenuView setActiveView={setActiveView} />;
       default:

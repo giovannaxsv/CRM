@@ -123,9 +123,9 @@ export function DashboardView() {
         })}
       </div>
 
-      {/* Charts Section */}
+      {/**/}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Bar Chart - Vendas por Mês */}
+        {/*Vendas por Mês */}
         <div className="lg:col-span-2 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
           <h3 className="text-lg text-gray-900 mb-4">Vendas por Mês</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -139,7 +139,7 @@ export function DashboardView() {
           </ResponsiveContainer>
         </div>
 
-        {/* Pie Chart - Status dos Clientes */}
+        {/* Status dos Clientes */}
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
           <h3 className="text-lg text-gray-900 mb-4">Status dos Clientes</h3>
           <ResponsiveContainer width="100%" height={300}>

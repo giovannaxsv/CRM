@@ -93,7 +93,7 @@ export function MainMenuView({ setActiveView }: MainMenuViewProps) {
           <p className="text-sm text-gray-500">Selecione uma opção para começar</p>
         </div>
 
-        {/* Quick Stats */}
+        {/**/}
         <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between">
