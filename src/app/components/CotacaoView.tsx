@@ -8,7 +8,7 @@ import {
 
 interface CotacaoViewProps {
   clientId: number | null;
-  onBackToContato: () => void;
+  onBackToSelecionarItens: () => void;
   onBackToClients: () => void;
   onOpenCalculoMargem: () => void;
 }
@@ -26,36 +26,36 @@ interface ClienteCotacao {
 const clientesMock: ClienteCotacao[] = [
   {
     id: 1,
-    nome: "Organic Grade A Coffee Beans",
-    contatoPrincipal: "Marina Costa",
-    vendedorResponsavel: "Julianaa",
+    nome: "KOMATSU DO BRASIL LTDA",
+    contatoPrincipal: "Tatiane",
+    vendedorResponsavel: "Everton",
     origemOportunidade: "Inbound - Site",
     observacoesIniciais:
-      "Cliente pediu proposta com recorrencia mensal e suporte tecnico.",
+      "Cliente pediu proposta com recorrência mensal e suporte técnico.",
     necessidadeIdentificada:
       "Automatizar abastecimento com previsibilidade de custo e entrega.",
   },
   {
     id: 2,
     nome: "Looking for Eletric Panels",
-    contatoPrincipal: "Ricardo Lima",
+    contatoPrincipal: "Fernanda",
     vendedorResponsavel: "Gorete",
-    origemOportunidade: "Indicacao",
+    origemOportunidade: "Indicação",
     observacoesIniciais:
-      "Solicitou comparativo entre pacotes com foco em reducao de custo.",
+      "Solicitou comparativo entre pacotes com foco em redução de custo.",
     necessidadeIdentificada:
-      "Estabilidade operacional e menor custo de manutencao anual.",
+      "Estabilidade operacional e menor custo de manutenção anual.",
   },
   {
     id: 3,
     nome: "Solar Panels",
-    contatoPrincipal: "Camila Rocha",
+    contatoPrincipal: "Fabiana",
     vendedorResponsavel: "Keila",
     origemOportunidade: "Evento",
     observacoesIniciais:
-      "Interesse em proposta modular para implantacao em fases.",
+      "Interesse em proposta modular para implantação em fases.",
     necessidadeIdentificada:
-      "Comecar com piloto e escalar para todas as unidades.",
+      "Começar com piloto e escalar para todas as unidades.",
   },
 ];
 
@@ -67,7 +67,7 @@ const interacoesIniciais = [
 
 export function CotacaoView({
   clientId,
-  onBackToContato,
+  onBackToSelecionarItens,
   onBackToClients,
   onOpenCalculoMargem,
 }: CotacaoViewProps) {
@@ -91,12 +91,12 @@ export function CotacaoView({
   }, [clientId]);
 
   const handleSalvarCotacao = () => {
-    setFeedback("Cotacao salva com sucesso.");
+    setFeedback("Cotação salva com sucesso.");
   };
 
   const handleSalvarEAvancar = () => {
     setFeedback(
-      "Cotacao salva. Proximo passo: calculo de preco e margem.",
+      "Cotação salva. Próximo passo: cálculo de preço e margem.",
     );
     onOpenCalculoMargem();
   };
@@ -105,14 +105,14 @@ export function CotacaoView({
     return (
       <div className="h-full bg-white p-6 flex flex-col">
         <button
-          onClick={onBackToContato}
+          onClick={onBackToSelecionarItens}
           className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
         >
           <ArrowLeft className="w-4 h-4" />
-          Voltar para contato
+          Voltar para seleção de itens
         </button>
         <div className="flex-1 flex items-center justify-center text-slate-500">
-          Cliente nao encontrado.
+          Cliente não encontrado.
         </div>
       </div>
     );
@@ -129,15 +129,17 @@ export function CotacaoView({
               <ChevronRight className="w-4 h-4" />
               <span>Realizar contato</span>
               <ChevronRight className="w-4 h-4" />
-              <span className="text-slate-900">Cotacao</span>
+              <span>Seleção de itens</span>
+              <ChevronRight className="w-4 h-4" />
+              <span className="text-slate-900">Cotação</span>
             </div>
-            <h1 className="text-2xl text-slate-900">Cotacao</h1>
+            <h1 className="text-2xl text-slate-900">Cotação</h1>
             <p className="text-sm text-slate-500 mt-1">
-              Cliente: {selectedCliente.nome} | Contato principal: {selectedCliente.contatoPrincipal} | Responsavel: {selectedCliente.vendedorResponsavel} | Etapa atual: Cotacao
+              Cliente: {selectedCliente.nome} | Contato principal: {selectedCliente.contatoPrincipal} | Responsável: {selectedCliente.vendedorResponsavel} | Etapa atual: Cotação
             </p>
           </div>
           <button
-            onClick={onBackToContato}
+            onClick={onBackToSelecionarItens}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -161,7 +163,7 @@ export function CotacaoView({
               <p className="text-slate-900 mt-1">{selectedCliente.contatoPrincipal}</p>
             </div>
             <div>
-              <p className="text-slate-500">Vendedor responsavel</p>
+              <p className="text-slate-500">Vendedor responsável</p>
               <p className="text-slate-900 mt-1">{selectedCliente.vendedorResponsavel}</p>
             </div>
             <div>
@@ -169,7 +171,7 @@ export function CotacaoView({
               <p className="text-slate-900 mt-1">{selectedCliente.origemOportunidade}</p>
             </div>
             <div className="md:col-span-2">
-              <p className="text-slate-500">Observacoes iniciais</p>
+              <p className="text-slate-500">Observações iniciais</p>
               <p className="text-slate-900 mt-1">{selectedCliente.observacoesIniciais}</p>
             </div>
             <div className="md:col-span-2 xl:col-span-3">
@@ -180,7 +182,7 @@ export function CotacaoView({
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-base text-slate-900 mb-4">Formulario da cotacao</h2>
+          <h2 className="text-base text-slate-900 mb-4">Formulário da cotação</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -189,17 +191,17 @@ export function CotacaoView({
                 type="text"
                 value={nomeOportunidade}
                 onChange={(event) => setNomeOportunidade(event.target.value)}
-                placeholder="Ex: Renovacao anual"
+                placeholder="Ex: Renovação anual"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Produto / servico</label>
+              <label className="block text-sm text-slate-700 mb-2">Produto / serviço</label>
               <input
                 type="text"
                 value={produtoServico}
                 onChange={(event) => setProdutoServico(event.target.value)}
-                placeholder="Nome do produto ou servico"
+                placeholder="Nome do produto ou serviço"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
@@ -222,7 +224,7 @@ export function CotacaoView({
               >
                 <option value="un">Unidade</option>
                 <option value="hora">Hora</option>
-                <option value="mes">Mes</option>
+                <option value="mes">Mês</option>
                 <option value="pacote">Pacote</option>
               </select>
             </div>
@@ -251,27 +253,27 @@ export function CotacaoView({
                 type="text"
                 value={origemOportunidade}
                 onChange={(event) => setOrigemOportunidade(event.target.value)}
-                placeholder="Ex: Indicacao, Evento, Site"
+                placeholder="Ex: Indicação, Evento, Site"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-sm text-slate-700 mb-2">Responsavel</label>
+              <label className="block text-sm text-slate-700 mb-2">Responsável</label>
               <input
                 type="text"
                 value={responsavel}
                 onChange={(event) => setResponsavel(event.target.value)}
-                placeholder="Nome do responsavel"
+                placeholder="Nome do responsável"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-700 mb-2">Observacoes comerciais</label>
+              <label className="block text-sm text-slate-700 mb-2">Observações comerciais</label>
               <textarea
                 rows={3}
                 value={observacoesComerciais}
                 onChange={(event) => setObservacoesComerciais(event.target.value)}
-                placeholder="Contexto comercial desta cotacao"
+                placeholder="Contexto comercial desta cotação"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
@@ -299,17 +301,17 @@ export function CotacaoView({
               className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
             >
               <Save className="w-4 h-4" />
-              Salvar cotacao
+              Salvar cotação
             </button>
             <button
               onClick={handleSalvarEAvancar}
               className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 text-sm rounded-lg hover:bg-slate-100 transition-colors"
             >
               <Calculator className="w-4 h-4" />
-              Salvar e avancar para calculo de preco e margem
+              Salvar e avançar para cálculo de preço e margem
             </button>
             <button
-              onClick={onBackToContato}
+              onClick={onBackToSelecionarItens}
               className="px-4 py-2 border border-slate-300 text-sm rounded-lg hover:bg-slate-100 transition-colors"
             >
               Voltar
@@ -318,7 +320,7 @@ export function CotacaoView({
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-base text-slate-900 mb-4">Interacoes iniciais</h2>
+          <h2 className="text-base text-slate-900 mb-4">Interações iniciais</h2>
           <div className="space-y-4">
             {interacoesIniciais.map((item, index) => (
               <div key={item} className="flex gap-4">

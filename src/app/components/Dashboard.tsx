@@ -36,7 +36,7 @@ export function Dashboard() {
               +12%
             </span>
           </div>
-          <p className="text-sm text-gray-500">Total Leads</p>
+          <p className="text-sm text-gray-500">Total de leads</p>
           <p className="text-3xl text-gray-900 mt-1">847</p>
         </div>
 
@@ -50,7 +50,7 @@ export function Dashboard() {
               +8%
             </span>
           </div>
-          <p className="text-sm text-gray-500">Clientes Ativos</p>
+          <p className="text-sm text-gray-500">Clientes ativos</p>
           <p className="text-3xl text-gray-900 mt-1">1,234</p>
         </div>
 
@@ -64,7 +64,7 @@ export function Dashboard() {
               +23%
             </span>
           </div>
-          <p className="text-sm text-gray-500">Receita Mensal</p>
+          <p className="text-sm text-gray-500">Receita mensal</p>
           <p className="text-3xl text-gray-900 mt-1">R$ 67k</p>
         </div>
 
@@ -79,7 +79,7 @@ export function Dashboard() {
             </span>
           </div>
           <p className="text-sm text-gray-500">Taxa de Conversão</p>
-          <p className="text-3xl text-gray-900 mt-1">18.5%</p>
+          <p className="text-3xl text-gray-900 mt-1">18,5%</p>
         </div>
       </div>
 

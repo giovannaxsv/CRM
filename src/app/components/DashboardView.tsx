@@ -4,7 +4,7 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 export function DashboardView() {
   const kpiCards = [
     {
-      title: 'Total de Clientes',
+      title: 'Total de clientes',
       value: '1,234',
       change: '+12.5%',
       isPositive: true,
@@ -13,7 +13,7 @@ export function DashboardView() {
     },
     {
       title: 'Vendas do Mês',
-      value: 'R$ 45.2K',
+      value: 'R$ 45,2 mil',
       change: '+8.2%',
       isPositive: true,
       icon: DollarSign,
@@ -28,7 +28,7 @@ export function DashboardView() {
       color: 'bg-purple-500',
     },
     {
-      title: 'Novos Leads',
+      title: 'Novos leads',
       value: '156',
       change: '+23.4%',
       isPositive: true,
@@ -55,7 +55,7 @@ export function DashboardView() {
   const recentActivities = [
     {
       id: 1,
-      cliente: 'Organic Grade A Coffee Beans',
+      cliente: 'KOMATSU DO BRASIL LTDA',
       acao: 'Novo contato realizado',
       horario: 'Há 2 horas',
       tipo: 'contato',
@@ -141,7 +141,7 @@ export function DashboardView() {
 
         {/* Status dos Clientes */}
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-          <h3 className="text-lg text-gray-900 mb-4">Status dos Clientes</h3>
+          <h3 className="text-lg text-gray-900 mb-4">Status dos clientes</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -166,7 +166,7 @@ export function DashboardView() {
 
       {/* Recent Activities */}
       <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-        <h3 className="text-lg text-gray-900 mb-4">Atividades Recentes</h3>
+        <h3 className="text-lg text-gray-900 mb-4">Atividades recentes</h3>
         <div className="space-y-4">
           {recentActivities.map((activity) => (
             <div

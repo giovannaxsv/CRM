@@ -1,40 +1,59 @@
 import {
-  Home,
-  User,
-  PlusCircle,
+  Calendar,
   Clock,
-  MessageSquare,
-  Image,
-  Briefcase,
-  Globe,
-  Headphones,
-  LogOut
+  FileText,
+  PhoneCall,
+  Target,
+  Users,
+  UserPlus,
+  ClipboardCheck,
+  BadgeDollarSign,
+  KanbanSquare,
 } from 'lucide-react';
 
 interface SidebarNavProps {
   activeView: string;
   setActiveView: (view: string) => void;
+  profile?: 'vendedores' | 'diretoria';
 }
 
-export function SidebarNav({ activeView, setActiveView }: SidebarNavProps) {
-  const menuItems = [
-    { id: 'main', icon: Home, label: 'Main' },
-    { id: 'clients', icon: User, label: 'Clientes' },
-    { id: 'add', icon: PlusCircle, label: 'Adicionar' },
-    { id: 'history', icon: Clock, label: 'Histórico' },
-    { id: 'messages', icon: MessageSquare, label: 'Mensagens' },
-    { id: 'gallery', icon: Image, label: 'Galeria' },
-    { id: 'business', icon: Briefcase, label: 'Negócios' },
-    { id: 'global', icon: Globe, label: 'Global' },
-    { id: 'support', icon: Headphones, label: 'Suporte' },
-    { id: 'logout', icon: LogOut, label: 'Sair' },
-  ];
+export function SidebarNav({ activeView, setActiveView, profile = 'vendedores' }: SidebarNavProps) {
+  const menuItems =
+    profile === 'diretoria'
+      ? [
+          { id: 'novo-contato', icon: PhoneCall, label: 'Novo contato' },
+          { id: 'clients', icon: Users, label: 'Clientes' },
+          { id: 'business', icon: Target, label: 'Cotações' },
+          { id: 'messages', icon: Clock, label: 'Agendar visita' },
+          //{ id: 'tasks', icon: FileText, label: 'Plano de ação' },
+          { id: 'plano-acao', icon: KanbanSquare, label: 'Plano de ação' },
+          { id: 'calendar', icon: Calendar, label: 'Agenda' },
+          { id: 'diretoria-politica-precos', icon: BadgeDollarSign, label: 'Política de preços' },
+          { id: 'history', icon: ClipboardCheck, label: 'Avaliar cotações pendentes' },
+          { id: 'new-client', icon: UserPlus, label: 'Novo cliente' },
+        ]
+      : [
+          { id: 'clients', icon: Users, label: 'Clientes' },
+          { id: 'novo-contato', icon: PhoneCall, label: 'Novo contato' },
+          { id: 'new-client', icon: UserPlus, label: 'Novo cliente' },
+          { id: 'business', icon: Target, label: 'Cotações' },
+          { id: 'messages', icon: Clock, label: 'Agendar visita' },
+          //{ id: 'tasks', icon: FileText, label: 'Plano de ação' },
+          { id: 'plano-acao', icon: KanbanSquare, label: 'Plano de ação' },
+          { id: 'calendar', icon: Calendar, label: 'Agenda' },
+        ];
+
+  const menuHomeView = profile === 'diretoria' ? 'diretoria-menu' : 'main';
 
   return (
     <div className="w-[90px] bg-slate-800 flex flex-col items-center py-6 gap-2">
-      <div className="mb-4 text-white text-xs px-3 py-2 bg-slate-700 rounded-md">
-        Main
-      </div>
+      <button
+        onClick={() => setActiveView(menuHomeView)}
+        className="mb-4 text-white text-xs px-3 py-2 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors"
+        title="Menu principal"
+      >
+        MENU
+      </button>
       {menuItems.map((item) => {
         const Icon = item.icon;
         const isActive = activeView === item.id;

@@ -13,12 +13,24 @@ interface Contact {
 }
 
 const mockContacts: Contact[] = [
-  { id: 1, name: 'Roberto Almeida', email: 'roberto@techcorp.com', phone: '(11) 98765-4321', company: 'Tech Corp', position: 'CEO', type: 'cliente', lastContact: '2026-03-28' },
-  { id: 2, name: 'Juliana Ferreira', email: 'juliana@innovate.com', phone: '(21) 99876-5432', company: 'Innovate Ltd', position: 'Diretora de TI', type: 'cliente', lastContact: '2026-03-25' },
-  { id: 3, name: 'Fernando Lima', email: 'fernando@solutions.com', phone: '(11) 97654-3210', company: 'Solutions Inc', position: 'Gerente de Projetos', type: 'prospect', lastContact: '2026-03-20' },
-  { id: 4, name: 'Camila Rodrigues', email: 'camila@digital.com', phone: '(85) 96543-2109', company: 'Digital Hub', position: 'Marketing Manager', type: 'parceiro', lastContact: '2026-03-30' },
-  { id: 5, name: 'Ricardo Souza', email: 'ricardo@enterprise.com', phone: '(11) 95432-1098', company: 'Enterprise Co', position: 'VP de Vendas', type: 'cliente', lastContact: '2026-03-15' },
-  { id: 6, name: 'Patrícia Costa', email: 'patricia@startup.io', phone: '(21) 94321-0987', company: 'Startup.io', position: 'Fundadora', type: 'prospect', lastContact: '2026-03-22' },
+  { id: 1, name: 'FUNDICAO INDUSTRIAL LTDA', email: 'contato1@empresa.com.br', phone: '(11) 97650-1201', company: 'FUNDICAO INDUSTRIAL LTDA', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-28' },
+  { id: 2, name: 'A FERROTEGRAO', email: 'contato2@empresa.com.br', phone: '(21) 97650-1202', company: 'A FERROTEGRAO', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-27' },
+  { id: 3, name: 'A FRIDBERG DO BRASIL INDUSTRI', email: 'contato3@empresa.com.br', phone: '(11) 97650-1203', company: 'A FRIDBERG DO BRASIL INDUSTRI', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-26' },
+  { id: 4, name: 'A TUDO PARA PNEUS LTDA', email: 'contato4@empresa.com.br', phone: '(21) 97650-1204', company: 'A TUDO PARA PNEUS LTDA', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-25' },
+  { id: 5, name: 'AB TELECOMUNICACOES', email: 'contato5@empresa.com.br', phone: '(11) 97650-1205', company: 'AB TELECOMUNICACOES', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-24' },
+  { id: 6, name: 'AB TRANSMISSAO AUTOMATICA LTDA', email: 'contato6@empresa.com.br', phone: '(21) 97650-1206', company: 'AB TRANSMISSAO AUTOMATICA LTDA', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-23' },
+  { id: 7, name: 'ABCD IND. E COM. DE EMBALAGENS', email: 'contato7@empresa.com.br', phone: '(11) 97650-1207', company: 'ABCD IND. E COM. DE EMBALAGENS', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-22' },
+  { id: 8, name: 'ACEARIA FREDERICO MISSNER LTDA', email: 'contato8@empresa.com.br', phone: '(21) 97650-1208', company: 'ACEARIA FREDERICO MISSNER LTDA', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-21' },
+  { id: 9, name: 'ACEFER INDUSTRIA COMERCIO LTDA', email: 'contato9@empresa.com.br', phone: '(11) 97650-1209', company: 'ACEFER INDUSTRIA COMERCIO LTDA', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-20' },
+  { id: 10, name: 'ACL METAIS LTDA', email: 'contato10@empresa.com.br', phone: '(21) 97650-1210', company: 'ACL METAIS LTDA', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-19' },
+  { id: 11, name: 'ACOBET INDUSTRIA METALICA E C', email: 'contato11@empresa.com.br', phone: '(11) 97650-1211', company: 'ACOBET INDUSTRIA METALICA E C', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-18' },
+  { id: 12, name: 'ACOCRIL INDUSTRIA E COMERCIO D', email: 'contato12@empresa.com.br', phone: '(21) 97650-1212', company: 'ACOCRIL INDUSTRIA E COMERCIO D', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-17' },
+  { id: 13, name: 'ACOTECNICAS A/IND E COMERCIO', email: 'contato13@empresa.com.br', phone: '(11) 97650-1213', company: 'ACOTECNICAS A/IND E COMERCIO', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-16' },
+  { id: 14, name: 'ACQUA MINERA COMERCIO IMPORTA', email: 'contato14@empresa.com.br', phone: '(21) 97650-1214', company: 'ACQUA MINERA COMERCIO IMPORTA', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-15' },
+  { id: 15, name: 'ACRILDESTAC IND. COM. LTDA EPP', email: 'contato15@empresa.com.br', phone: '(11) 97650-1215', company: 'ACRILDESTAC IND. COM. LTDA EPP', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-14' },
+  { id: 16, name: 'ACRIVILLE COMERCIO DE ACRILICO', email: 'contato16@empresa.com.br', phone: '(21) 97650-1216', company: 'ACRIVILLE COMERCIO DE ACRILICO', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-13' },
+  { id: 17, name: 'ACTIONGYM COMERCIO DE MATERIAL', email: 'contato17@empresa.com.br', phone: '(11) 97650-1217', company: 'ACTIONGYM COMERCIO DE MATERIAL', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-12' },
+  { id: 18, name: 'ACUMULADORES MOURA S.A', email: 'contato18@empresa.com.br', phone: '(21) 97650-1218', company: 'ACUMULADORES MOURA S.A', position: 'Cliente Corporativo', type: 'cliente', lastContact: '2026-03-11' },
 ];
 
 const typeColors = {

@@ -66,9 +66,9 @@ export function LeadsView() {
             <Filter size={20} />
             Filtrar
           </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700">
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700">
             <Plus size={20} />
-            Novo Lead
+            Novo lead
           </button>
         </div>
 
@@ -128,7 +128,7 @@ export function LeadsView() {
 
           <div className="space-y-6">
             <div>
-              <h4 className="text-sm text-gray-500 mb-3">Informações de Contato</h4>
+              <h4 className="text-sm text-gray-500 mb-3">Informações de contato</h4>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-sm">
                   <Mail size={16} className="text-gray-400" />
@@ -151,7 +151,7 @@ export function LeadsView() {
                   </span>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Valor Estimado</p>
+                  <p className="text-xs text-gray-500">Valor estimado</p>
                   <p className="text-sm text-gray-900 mt-1">R$ {selectedLead.value.toLocaleString('pt-BR')}</p>
                 </div>
                 <div>
@@ -162,10 +162,10 @@ export function LeadsView() {
             </div>
 
             <div className="pt-6 border-t border-gray-200">
-              <h4 className="text-sm text-gray-500 mb-3">Atividades Recentes</h4>
+              <h4 className="text-sm text-gray-500 mb-3">Atividades recentes</h4>
               <div className="space-y-3">
                 <div className="text-sm">
-                  <p className="text-gray-900">Email enviado</p>
+                  <p className="text-gray-900">E-mail enviado</p>
                   <p className="text-xs text-gray-500">Há 2 dias</p>
                 </div>
                 <div className="text-sm">
@@ -177,10 +177,10 @@ export function LeadsView() {
 
             <div className="pt-6 space-y-2">
               <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                Enviar Email
+                Enviar e-mail
               </button>
               <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                Agendar Reunião
+                Agendar reunião
               </button>
             </div>
           </div>

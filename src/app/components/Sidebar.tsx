@@ -18,7 +18,7 @@ export function Sidebar({ activeView, setActiveView }: SidebarProps) {
     <div className="w-60 bg-[#1e1e1e] text-white flex flex-col">
       <div className="p-6 border-b border-gray-700">
         <h1 className="text-xl text-white">CRM Pro</h1>
-        <p className="text-xs text-gray-400 mt-1">Gestão de Clientes</p>
+        <p className="text-xs text-gray-400 mt-1">Gestão de clientes</p>
       </div>
 
       <nav className="flex-1 p-4">
@@ -47,7 +47,7 @@ export function Sidebar({ activeView, setActiveView }: SidebarProps) {
             <span className="text-sm">U</span>
           </div>
           <div>
-            <p className="text-sm">Usuário Demo</p>
+            <p className="text-sm">Usuário de demonstração</p>
             <p className="text-xs text-gray-400">usuario@empresa.com</p>
           </div>
         </div>

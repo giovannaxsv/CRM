@@ -10,10 +10,12 @@ import {
 
 interface NovoClienteViewProps {
   onBackToClients: () => void;
+  isDiretoria?: boolean;
 }
 
 export function NovoClienteView({
   onBackToClients,
+  isDiretoria = false,
 }: NovoClienteViewProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -40,19 +42,21 @@ export function NovoClienteView({
             <ChevronRight className="w-4 h-4" />
             <span className="font-medium">Clientes</span>
             <ChevronRight className="w-4 h-4" />
-            <span className="font-medium text-gray-900">Novo Cliente</span>
+            <span className="font-medium text-gray-900">Novo cliente</span>
           </div>
-          <button
-            onClick={onBackToClients}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
-          </button>
+          {!isDiretoria && (
+            <button
+              onClick={onBackToClients}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </button>
+          )}
         </div>
 
         <div>
-          <h1 className="text-2xl text-gray-900 mb-1">Cadastrar Novo Cliente</h1>
+          <h1 className="text-2xl text-gray-900 mb-1">Cadastrar novo cliente</h1>
           <p className="text-sm text-gray-500">
             Esta página é acessada somente pelo botão Novo Cliente.
           </p>
@@ -62,7 +66,7 @@ export function NovoClienteView({
       <div className="flex-1 overflow-auto p-6">
         <div className="max-w-5xl space-y-6">
           <section className="border border-gray-200 rounded-xl p-5">
-            <h2 className="text-base text-gray-900 mb-4">Dados basicos</h2>
+            <h2 className="text-base text-gray-900 mb-4">Dados básicos</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm text-gray-700 mb-2">Nome</label>
@@ -91,7 +95,7 @@ export function NovoClienteView({
                 <label className="block text-sm text-gray-700 mb-2">Segmento</label>
                 <input
                   type="text"
-                  placeholder="Ex: Industria, SaaS, Varejo"
+                  placeholder="Ex: Indústria, SaaS, Varejo"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                 />
               </div>
@@ -99,7 +103,7 @@ export function NovoClienteView({
                 <label className="block text-sm text-gray-700 mb-2">Origem do cliente</label>
                 <input
                   type="text"
-                  placeholder="Ex: Indicacao, Site, Evento"
+                  placeholder="Ex: Indicação, Site, Evento"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                 />
               </div>
@@ -129,10 +133,10 @@ export function NovoClienteView({
           </section>
 
           <section className="border border-gray-200 rounded-xl p-5">
-            <h2 className="text-base text-gray-900 mb-4">Informacoes comerciais</h2>
+            <h2 className="text-base text-gray-900 mb-4">Informações comerciais</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-700 mb-2">Vendedor Responsavel</label>
+                <label className="block text-sm text-gray-700 mb-2">Vendedor responsável</label>
                 <input
                   type="text"
                   placeholder="Nome do vendedor"
@@ -140,9 +144,9 @@ export function NovoClienteView({
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-700 mb-2">Canal prioritario</label>
+                <label className="block text-sm text-gray-700 mb-2">Canal prioritário</label>
                 <select className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent">
-                  <option value="email">Email</option>
+                  <option value="email">E-mail</option>
                   <option value="telefone">Telefone</option>
                   <option value="whatsapp">WhatsApp</option>
                 </select>
@@ -151,12 +155,12 @@ export function NovoClienteView({
           </section>
 
           <section className="border border-gray-200 rounded-xl p-5">
-            <h2 className="text-base text-gray-900 mb-4">Observacoes</h2>
+            <h2 className="text-base text-gray-900 mb-4">Observações</h2>
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Observacoes gerais</label>
+              <label className="block text-sm text-gray-700 mb-2">Observações gerais</label>
               <textarea
                 rows={5}
-                placeholder="Adicione observacoes relevantes sobre o cliente"
+                placeholder="Adicione observações relevantes sobre o cliente"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
@@ -184,15 +188,17 @@ export function NovoClienteView({
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              {isSaving ? "Salvando..." : "Salvar Cliente"}
+              {isSaving ? "Salvando..." : "Salvar cliente"}
             </button>
-            <button
-              disabled={isSaving}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-sm rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              <UserPlus className="w-4 h-4" />
-              Salvar e adicionar contato
-            </button>
+            {!isDiretoria && (
+              <button
+                disabled={isSaving}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-sm rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <UserPlus className="w-4 h-4" />
+                Salvar e adicionar contato
+              </button>
+            )}
           </div>
         </div>
       </div>
