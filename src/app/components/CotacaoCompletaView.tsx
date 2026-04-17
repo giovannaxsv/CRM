@@ -219,7 +219,6 @@ function buildEmailCotacao(cotacao: CotacaoDetalhada) {
       `Código: ${cotacao.codigo}`,
       `Cliente: ${cotacao.cliente}`,
       `Responsável: ${cotacao.responsavel}`,
-      `Nome da oportunidade: ${cotacao.nomeOportunidade}`,
       `Produto / serviço: ${cotacao.produtoServico}`,
       `Quantidade: ${cotacao.quantidade} ${cotacao.unidade}`,
       `Valor estimado: ${toCurrency(cotacao.valorEstimado)}`,
@@ -628,10 +627,7 @@ export function CotacaoCompletaView({
           <h2 className="text-base text-slate-900 mb-4">Formulário da cotação</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-slate-600">Nome da oportunidade</p>
-              <p className="text-sm text-slate-900 mt-1">{cotacao.nomeOportunidade}</p>
-            </div>
+           
             <div>
               <p className="text-sm text-slate-600">Produto / serviço</p>
               <p className="text-sm text-slate-900 mt-1">{cotacao.produtoServico}</p>

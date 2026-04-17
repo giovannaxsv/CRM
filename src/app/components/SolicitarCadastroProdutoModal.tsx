@@ -59,8 +59,8 @@ const produtosEmpresaMock: ProdutoEmpresaCatalogo[] = [
   {
     codigo: "EMP-004",
     nome: produtosReais[17],
-    categoria: "Energia Solar",
-    especificacao: "Kit modular para implantação de sistemas fotovoltaicos.",
+    categoria: "Ligas de Aço Inoxidável",
+    especificacao: "Kit modular para implantação de sistemas.",
     unidade: "un",
   },
 ];

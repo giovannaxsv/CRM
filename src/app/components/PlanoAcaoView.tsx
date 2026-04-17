@@ -79,7 +79,7 @@ const clientesMock: ClientePlanoAcao[] = [
     id: 3,
     nome: "A FRIDBERG DO BRASIL INDUSTRI",
     vendedor: "Keila",
-    produtos: ["Inversor solar", "Estrutura de fixação"],
+    produtos: ["Painel", "Estrutura de fixação"],
   },
   {
     id: 4,
@@ -107,7 +107,7 @@ const planosMock: PlanoAcaoItem[] = [
     clienteId: 3,
     cliente: "A FRIDBERG DO BRASIL INDUSTRI",
     vendedor: "Keila",
-    produtoNoCliente: "Inversor solar",
+    produtoNoCliente: "Inversor",
     procedencia: "Contato ativo",
     acao: "Validar cronograma de instalação",
     detalhes: "Confirmar equipe disponível e janela de manutenção com o cliente.",

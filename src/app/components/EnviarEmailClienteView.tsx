@@ -29,7 +29,7 @@ const clientesMock: ClienteEmailResumo[] = [
   },
   {
     id: 2,
-    nome: "Looking for Eletric Panels",
+    nome: "ACOCRIL INDUSTRIA E COMERCIO",
     vendedor: "Gorete",
     email: "inquiry@panels.com",
     ultimaAcao: "Primeira reunião concluída e aguardando retorno interno do cliente.",
@@ -38,7 +38,7 @@ const clientesMock: ClienteEmailResumo[] = [
   },
   {
     id: 3,
-    nome: "Solar Panels",
+    nome: "ACRILDESTAC IND. COM. LTDA EPP",
     vendedor: "Keila",
     email: "info@solar.com",
     ultimaAcao: "Oportunidade pausada, sugerida retomada com nova abordagem comercial.",

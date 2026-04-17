@@ -22,21 +22,21 @@ interface ClienteResumo {
 const clientesMock: ClienteResumo[] = [
   {
     id: 1,
-    nome: "Organic Grade A Coffee Beans",
+    nome: "ACRILDESTAC IND. COM. LTDA",
     vendedor: "Everton",
     status: "Ativo",
     ultimoContato: "2 dias atrás",
   },
   {
     id: 2,
-    nome: "Looking for Eletric Panels",
+    nome: "ACEFER INDUSTRIA COMERCIO LTDA",
     vendedor: "Gorete",
     status: "Venda passiva",
     ultimoContato: "5 dias atrás",
   },
   {
     id: 3,
-    nome: "Solar Panels",
+    nome: "ACRILDESTAC IND. COM. LTDA",
     vendedor: "Keila",
     status: "Inativo",
     ultimoContato: "30 dias atrás",

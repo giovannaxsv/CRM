@@ -185,16 +185,7 @@ export function CotacaoView({
           <h2 className="text-base text-slate-900 mb-4">Formulário da cotação</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Nome da oportunidade</label>
-              <input
-                type="text"
-                value={nomeOportunidade}
-                onChange={(event) => setNomeOportunidade(event.target.value)}
-                placeholder="Ex: Renovação anual"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
-            </div>
+          
             <div>
               <label className="block text-sm text-slate-700 mb-2">Produto / serviço</label>
               <input
@@ -222,9 +213,9 @@ export function CotacaoView({
                 onChange={(event) => setUnidade(event.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               >
-                <option value="un">Unidade</option>
-                <option value="hora">Hora</option>
-                <option value="mes">Mês</option>
+                
+                <option value="hora">Ton</option>
+                <option value="mes">Kg</option>
                 <option value="pacote">Pacote</option>
               </select>
             </div>

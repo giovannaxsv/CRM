@@ -88,7 +88,7 @@ const clientesMock: ClienteContato[] = [
   },
   {
     id: 2,
-    nome: "Looking for Eletric Panels",
+    nome: "ACOCRIL INDUSTRIA E COMERCIO",
     email: "inquiry@panels.com",
     telefone: "(21) 99876-4432",
     vendedor: "Gorete",
@@ -98,7 +98,7 @@ const clientesMock: ClienteContato[] = [
   },
   {
     id: 3,
-    nome: "Solar Panels",
+    nome: "ACRILDESTAC IND. COM. LTDA EPP",
     email: "info@solar.com",
     telefone: "(31) 97654-8890",
     vendedor: "Keila",
