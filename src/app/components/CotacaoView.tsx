@@ -23,6 +23,12 @@ interface ClienteCotacao {
   necessidadeIdentificada: string;
 }
 
+interface ProdutoSelecionadoCotacao {
+  id: number;
+  clientId: number;
+  nome: string;
+}
+
 const clientesMock: ClienteCotacao[] = [
   {
     id: 1,
@@ -65,33 +71,62 @@ const interacoesIniciais = [
   "Cliente interessado em proposta",
 ];
 
+const produtosSelecionadosMock: ProdutoSelecionadoCotacao[] = [
+  {
+    id: 1,
+    clientId: 1,
+    nome: "Níquel Placas",
+  },
+  {
+    id: 2,
+    clientId: 1,
+    nome: "Níquel Catodos",
+  },
+  {
+    id: 3,
+    clientId: 2,
+    nome: "Coque Metalúrgico Leve",
+  },
+  {
+    id: 4,
+    clientId: 2,
+    nome: "Grafite",
+  },
+  {
+    id: 5,
+    clientId: 3,
+    nome: "Sucata de Alumínio",
+  },
+  {
+    id: 6,
+    clientId: 3,
+    nome: "Silício Metálico (SiMe)",
+  },
+];
+
 export function CotacaoView({
   clientId,
   onBackToSelecionarItens,
   onBackToClients,
   onOpenCalculoMargem,
 }: CotacaoViewProps) {
-  const [nomeOportunidade, setNomeOportunidade] = useState("");
-  const [produtoServico, setProdutoServico] = useState("");
-  const [quantidade, setQuantidade] = useState("");
-  const [unidade, setUnidade] = useState("un");
-  const [valorEstimado, setValorEstimado] = useState("");
-  const [prazoDesejado, setPrazoDesejado] = useState("");
-  const [observacoesComerciais, setObservacoesComerciais] =
-    useState("");
-  const [necessidadeCliente, setNecessidadeCliente] =
-    useState("");
-  const [origemOportunidade, setOrigemOportunidade] =
-    useState("");
-  const [responsavel, setResponsavel] = useState("");
+  const [modalidadeFrete, setModalidadeFrete] = useState<"CIF" | "FOB">("CIF");
+  const [valorFrete, setValorFrete] = useState("");
+  const [condPagamento, setCondPagamento] = useState("");
+  const [filialFaturamento, setFilialFaturamento] = useState("");
+  const [dataRetorno, setDataRetorno] = useState("");
   const [feedback, setFeedback] = useState("");
 
   const selectedCliente = useMemo(() => {
     return clientesMock.find((cliente) => cliente.id === clientId);
   }, [clientId]);
 
+  const produtosSelecionadosParaCotacao = useMemo(() => {
+    return produtosSelecionadosMock.filter((item) => item.clientId === clientId);
+  }, [clientId]);
+
   const handleSalvarCotacao = () => {
-    setFeedback("Cotação salva com sucesso.");
+    setFeedback("Dados comerciais da cotação salvos com sucesso.");
   };
 
   const handleSalvarEAvancar = () => {
@@ -181,103 +216,107 @@ export function CotacaoView({
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-base text-slate-900 mb-4">Formulário da cotação</h2>
+        <section className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+          <h2 className="text-base text-slate-900">Dados da cotação</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Produto / serviço</label>
-              <input
-                type="text"
-                value={produtoServico}
-                onChange={(event) => setProdutoServico(event.target.value)}
-                placeholder="Nome do produto ou serviço"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
+          <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-4 items-start">
+            <aside className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <h3 className="text-sm text-slate-900">Produtos selecionados</h3>
+                <span className="text-xs text-slate-500">{produtosSelecionadosParaCotacao.length}</span>
+              </div>
+
+              {produtosSelecionadosParaCotacao.length === 0 ? (
+                <p className="text-sm text-slate-600">Nenhum produto selecionado para este cliente.</p>
+              ) : (
+                <ul className="max-h-72 overflow-auto space-y-1">
+                  {produtosSelecionadosParaCotacao.map((item) => (
+                    <li key={item.id} className="rounded-md border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-900 leading-tight">
+                      {item.nome}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </aside>
+
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <h3 className="text-sm text-slate-900 mb-3">Informações comerciais</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end text-sm">
+              <div className="md:col-span-2">
+                <label className="block text-xs text-slate-700 mb-1">Tipo de frete</label>
+                <div className="h-10 rounded-lg border border-slate-300 bg-white px-3 flex items-center gap-4">
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="tipo-frete"
+                      checked={modalidadeFrete === "CIF"}
+                      onChange={() => setModalidadeFrete("CIF")}
+                      className="h-3.5 w-3.5"
+                    />
+                    CIF
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="tipo-frete"
+                      checked={modalidadeFrete === "FOB"}
+                      onChange={() => setModalidadeFrete("FOB")}
+                      className="h-3.5 w-3.5"
+                    />
+                    FOB
+                  </label>
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-xs text-slate-700 mb-1">Valor do frete</label>
+                <input
+                  type="text"
+                  value={valorFrete}
+                  onChange={(event) => setValorFrete(event.target.value)}
+                  placeholder="Valor do frete"
+                  className="w-full h-10 px-3 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="md:col-span-3">
+                <label className="block text-xs text-slate-700 mb-1">Cond. pagamento</label>
+                <input
+                  type="text"
+                  value={condPagamento}
+                  onChange={(event) => setCondPagamento(event.target.value)}
+                  placeholder="Digite a condição"
+                  className="w-full h-10 px-3 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="md:col-span-3">
+                <label className="block text-xs text-slate-700 mb-1">Filial de faturamento</label>
+                <select
+                  value={filialFaturamento}
+                  onChange={(event) => setFilialFaturamento(event.target.value)}
+                  className="w-full h-10 px-3 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                >
+                  <option value="">Selecione a filial</option>
+                  <option value="matriz">Matriz</option>
+                  <option value="sul">Filial Sul</option>
+                  <option value="sudeste">Filial Sudeste</option>
+                  <option value="nordeste">Filial Nordeste</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-xs text-slate-700 mb-1">Data de retorno</label>
+                <input
+                  type="date"
+                  value={dataRetorno}
+                  onChange={(event) => setDataRetorno(event.target.value)}
+                  className="w-full h-10 px-3 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Quantidade</label>
-              <input
-                type="number"
-                value={quantidade}
-                onChange={(event) => setQuantidade(event.target.value)}
-                placeholder="0"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Unidade</label>
-              <select
-                value={unidade}
-                onChange={(event) => setUnidade(event.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              >
-                
-                <option value="hora">Ton</option>
-                <option value="mes">Kg</option>
-                <option value="pacote">Pacote</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Valor estimado</label>
-              <input
-                type="text"
-                value={valorEstimado}
-                onChange={(event) => setValorEstimado(event.target.value)}
-                placeholder="R$ 0,00"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Prazo desejado</label>
-              <input
-                type="date"
-                value={prazoDesejado}
-                onChange={(event) => setPrazoDesejado(event.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Origem da oportunidade</label>
-              <input
-                type="text"
-                value={origemOportunidade}
-                onChange={(event) => setOrigemOportunidade(event.target.value)}
-                placeholder="Ex: Indicação, Evento, Site"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Responsável</label>
-              <input
-                type="text"
-                value={responsavel}
-                onChange={(event) => setResponsavel(event.target.value)}
-                placeholder="Nome do responsável"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm text-slate-700 mb-2">Observações comerciais</label>
-              <textarea
-                rows={3}
-                value={observacoesComerciais}
-                onChange={(event) => setObservacoesComerciais(event.target.value)}
-                placeholder="Contexto comercial desta cotação"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm text-slate-700 mb-2">Necessidade do cliente</label>
-              <textarea
-                rows={4}
-                value={necessidadeCliente}
-                onChange={(event) => setNecessidadeCliente(event.target.value)}
-                placeholder="Descreva a necessidade em detalhes"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
-            </div>
+          </div>
           </div>
 
           {feedback && (
@@ -310,22 +349,7 @@ export function CotacaoView({
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-base text-slate-900 mb-4">Interações iniciais</h2>
-          <div className="space-y-4">
-            {interacoesIniciais.map((item, index) => (
-              <div key={item} className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <span className="w-2.5 h-2.5 rounded-full bg-slate-700 mt-1" />
-                  {index < interacoesIniciais.length - 1 && (
-                    <span className="w-px flex-1 bg-slate-200 mt-2" />
-                  )}
-                </div>
-                <p className="text-sm text-slate-900">{item}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+      
 
         <div className="flex justify-end">
           <button

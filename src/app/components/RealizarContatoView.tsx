@@ -34,10 +34,13 @@ interface ProdutoContato {
   nome: string;
 }
 
-type EvolucaoCotacao = "sim" | "nao" | "";
+type StatusCliente = "Ativo" | "Inativo" | "Venda passiva";
+
+type StatusContato = "aguardando-retorno" | "sim" | "nao";
 type MotivoNaoEvolucao =
   | ""
   | "cliente-sem-interesse"
+  | "cliente-nao-respondeu"
   | "preco-fora-do-esperado"
   | "momento-inadequado"
   | "sem-orcamento"
@@ -46,12 +49,26 @@ type MotivoNaoEvolucao =
 
 const motivosNaoEvolucao = [
   { value: "cliente-sem-interesse", label: "Cliente sem interesse" },
+  { value: "cliente-nao-respondeu", label: "Cliente não respondeu" },
   { value: "preco-fora-do-esperado", label: "Preço fora do esperado" },
   { value: "momento-inadequado", label: "Momento inadequado" },
   { value: "sem-orcamento", label: "Sem orçamento" },
   { value: "concorrencia", label: "Concorrência" },
   { value: "outro", label: "Outro" },
 ] as const;
+
+const assuntosPredefinidos = [
+  "Apresentação institucional",
+  "Proposta comercial",
+  "Negociação de preços",
+  "Acompanhamento de cotação",
+  "Pós-venda",
+  "Agendamento de reunião",
+  "Suporte técnico",
+  "Outro",
+] as const;
+
+const statusClienteOpcoes: StatusCliente[] = ["Ativo", "Inativo", "Venda passiva"];
 
 const produtosReais = [
   "Níquel Placas",
@@ -124,6 +141,33 @@ const produtosCarteiraPorCliente: Record<number, number[]> = {
   3: [12, 13, 14],
 };
 
+const ultimoContatoRegistradoPorCliente: Record<
+  number,
+  { data: string; canal: string; assunto: string; resultado: string; responsavel: string }
+> = {
+  1: {
+    data: "18/04/2026 - 10:35",
+    canal: "Ligação",
+    assunto: "Acompanhamento de cotação",
+    resultado: "Cliente confirmou interesse e solicitou atualização de preço para novo volume.",
+    responsavel: "Everton",
+  },
+  2: {
+    data: "15/04/2026 - 14:10",
+    canal: "E-mail",
+    assunto: "Proposta comercial",
+    resultado: "Proposta enviada. Cliente informou que vai validar internamente antes do retorno final.",
+    responsavel: "Gorete",
+  },
+  3: {
+    data: "23/03/2026 - 09:20",
+    canal: "Ligação",
+    assunto: "Reativação de conta",
+    resultado: "Contato sem avanço imediato. Cliente pediu novo contato no próximo ciclo de compras.",
+    responsavel: "Keila",
+  },
+};
+
 type FiltroProdutos = "todos" | "carteira";
 
 export function RealizarContatoView({
@@ -132,12 +176,13 @@ export function RealizarContatoView({
   onBackToClients,
   onAdvanceToSelecionarItens,
 }: RealizarContatoViewProps) {
-  const [evoluiParaCotacao, setEvoluiParaCotacao] = useState<EvolucaoCotacao>("");
+  const [evoluiParaCotacao, setEvoluiParaCotacao] = useState<StatusContato>("aguardando-retorno");
   const [tipoContato, setTipoContato] = useState("ligacao");
   const [dataContato, setDataContato] = useState("");
   const [horaContato, setHoraContato] = useState("");
   const [responsavel, setResponsavel] = useState("");
   const [assunto, setAssunto] = useState("");
+  const [statusCliente, setStatusCliente] = useState<StatusCliente>("Ativo");
   const [resultadoContato, setResultadoContato] = useState("");
   const [demonstrouPotencial, setDemonstrouPotencial] =
     useState(false);
@@ -165,6 +210,14 @@ export function RealizarContatoView({
     const ids = clientId ? produtosCarteiraPorCliente[clientId] ?? [] : [];
 
     return catalogoProdutos.filter((produto) => ids.includes(produto.id));
+  }, [clientId]);
+
+  const ultimoContatoRegistrado = useMemo(() => {
+    if (!clientId) {
+      return null;
+    }
+
+    return ultimoContatoRegistradoPorCliente[clientId] ?? null;
   }, [clientId]);
 
   const produtosVisiveis = useMemo(() => {
@@ -211,6 +264,14 @@ export function RealizarContatoView({
     }
   }, [motivoNaoEvolucao]);
 
+  useEffect(() => {
+    if (!selectedCliente) {
+      return;
+    }
+
+    setStatusCliente(selectedCliente.status as StatusCliente);
+  }, [selectedCliente]);
+
   const precisaMotivoNaoEvolucao = evoluiParaCotacao === "nao";
   const motivoNaoEvolucaoValido =
     !precisaMotivoNaoEvolucao ||
@@ -222,7 +283,7 @@ export function RealizarContatoView({
     (evoluiParaCotacao === "nao" && motivoNaoEvolucaoValido);
   const rotuloAcaoPrincipal =
     evoluiParaCotacao === "nao"
-      ? "Salvar e encerrar contato"
+      ? "Salvar e marcar como perdido"
       : evoluiParaCotacao === "sim"
         ? "Salvar e selecionar itens"
         : "Salvar e selecionar itens";
@@ -297,7 +358,7 @@ export function RealizarContatoView({
               {selectedCliente.nome}
             </h1>
             <p className="text-sm text-slate-500 mt-1">
-              Vendedor: {selectedCliente.vendedor} | Status: {selectedCliente.status} | Último contato: {selectedCliente.ultimoContato}
+              Vendedor: {selectedCliente.vendedor} | Status: {statusCliente} | Último contato: {selectedCliente.ultimoContato}
             </p>
           </div>
           <button
@@ -310,52 +371,91 @@ export function RealizarContatoView({
         </div>
       </div>
 
-      <div className="p-6 grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-6">
-        <aside className="rounded-xl border border-slate-200 bg-white p-5 h-fit">
-          <h2 className="text-sm text-slate-500 mb-4">Informações do cliente</h2>
-          <dl className="space-y-4">
-            <div>
-              <dt className="text-xs text-slate-500">Nome</dt>
-              <dd className="text-sm text-slate-900 mt-1">{selectedCliente.nome}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">E-mail</dt>
-              <dd className="text-sm text-slate-900 mt-1">{selectedCliente.email}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Telefone</dt>
-              <dd className="text-sm text-slate-900 mt-1">{selectedCliente.telefone}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Vendedor</dt>
-              <dd className="text-sm text-slate-900 mt-1">{selectedCliente.vendedor}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Status</dt>
-              <dd className="text-sm text-slate-900 mt-1">{selectedCliente.status}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Último contato</dt>
-              <dd className="text-sm text-slate-900 mt-1">{selectedCliente.ultimoContato}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-slate-500">Observações resumidas</dt>
-              <dd className="text-sm text-slate-700 mt-1">{selectedCliente.observacoes}</dd>
-            </div>
-          </dl>
+      <div className="p-4 md:p-5 grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-4">
+        <aside className="h-fit space-y-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <h2 className="text-sm text-slate-500 mb-3">Informações do cliente</h2>
+            <dl className="space-y-3">
+              <div>
+                <dt className="text-xs text-slate-500">Nome</dt>
+                <dd className="text-sm text-slate-900 mt-1">{selectedCliente.nome}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-slate-500">E-mail</dt>
+                <dd className="text-sm text-slate-900 mt-1">{selectedCliente.email}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-slate-500">Telefone</dt>
+                <dd className="text-sm text-slate-900 mt-1">{selectedCliente.telefone}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-slate-500">Vendedor</dt>
+                <dd className="text-sm text-slate-900 mt-1">{selectedCliente.vendedor}</dd>
+              </div>
+              
+              <div>
+                <dt className="text-xs text-slate-500">Status do cliente</dt>
+                <dd className="mt-2">
+                  <select
+                    value={statusCliente}
+                    onChange={(event) => setStatusCliente(event.target.value as StatusCliente)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  >
+                    {statusClienteOpcoes.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                </dd>
+              </div>
+             
+            </dl>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <h2 className="text-sm text-slate-500 mb-3">Resumo do último contato</h2>
+
+            {ultimoContatoRegistrado ? (
+              <dl className="space-y-2.5">
+                <div>
+                  <dt className="text-xs text-slate-500">Data e hora</dt>
+                  <dd className="text-sm text-slate-900 mt-1">{ultimoContatoRegistrado.data}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-slate-500">Canal</dt>
+                  <dd className="text-sm text-slate-900 mt-1">{ultimoContatoRegistrado.canal}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-slate-500">Assunto</dt>
+                  <dd className="text-sm text-slate-900 mt-1">{ultimoContatoRegistrado.assunto}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-slate-500">Responsável</dt>
+                  <dd className="text-sm text-slate-900 mt-1">{ultimoContatoRegistrado.responsavel}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-slate-500">Resultado</dt>
+                  <dd className="text-sm text-slate-700 mt-1">{ultimoContatoRegistrado.resultado}</dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="text-sm text-slate-500">Nenhum contato anterior registrado para este cliente.</p>
+            )}
+          </div>
         </aside>
 
-        <main className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-base text-slate-900 mb-4">Registro do contato</h2>
+        <main className="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+          <h2 className="text-base text-slate-900 mb-3">Registro do contato</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
         
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Tipo de contato</label>
+            <div className="md:col-span-2">
+              <label className="block text-xs text-slate-700 mb-1">Tipo de contato</label>
               <select
                 value={tipoContato}
                 onChange={(event) => setTipoContato(event.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               >
                 <option value="ligacao">Ligação</option>
                 <option value="email">E-mail</option>
@@ -365,66 +465,61 @@ export function RealizarContatoView({
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Responsável</label>
+            <div className="md:col-span-4">
+              <label className="block text-xs text-slate-700 mb-1">Assunto</label>
+              <select
+                value={assunto}
+                onChange={(event) => setAssunto(event.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              >
+                <option value="">Selecione um assunto</option>
+                {assuntosPredefinidos.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="md:col-span-4">
+              <label className="block text-xs text-slate-700 mb-1">Responsável</label>
               <input
                 type="text"
                 value={responsavel}
                 onChange={(event) => setResponsavel(event.target.value)}
                 placeholder="Nome do responsável"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
 
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Data do contato</label>
+            <div className="md:col-span-2">
+              <label className="block text-xs text-slate-700 mb-1">Data do contato</label>
               <input
                 type="date"
                 value={dataContato}
                 onChange={(event) => setDataContato(event.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
 
-            <div>
-              <label className="block text-sm text-slate-700 mb-2">Hora do contato</label>
-              <input
-                type="time"
-                value={horaContato}
-                onChange={(event) => setHoraContato(event.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm text-slate-700 mb-2">Assunto</label>
-              <input
-                type="text"
-                value={assunto}
-                onChange={(event) => setAssunto(event.target.value)}
-                placeholder="Resumo do assunto tratado"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm text-slate-700 mb-2">Resultado do contato</label>
+            <div className="md:col-span-12">
+              <label className="block text-xs text-slate-700 mb-1">Resultado do contato</label>
               <textarea
-                rows={4}
+                rows={3}
                 value={resultadoContato}
                 onChange={(event) => setResultadoContato(event.target.value)}
                 placeholder="Descreva o resultado da interação"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
             </div>
 
-            <div className="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-4">
+            <div className="md:col-span-12 rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <label className="block text-sm text-slate-700 mb-1">
                     Produtos oferecidos no contato
                   </label>
-                  <p className="text-xs text-slate-500 max-w-2xl">
+                  <p className="text-xs text-slate-500 max-w-2xl leading-tight">
                     Selecione um ou mais produtos para registrar a oferta. A busca ocorre dentro do menu suspenso e a lista pode ser restringida aos itens da carteira do cliente.
                   </p>
                 </div>
@@ -451,7 +546,7 @@ export function RealizarContatoView({
 
                   {popoverProdutosAberto && (
                     <div className="absolute right-0 top-full z-40 mt-2 w-[min(42rem,calc(100vw-2rem))] rounded-xl border border-slate-200 bg-white overflow-hidden shadow-lg">
-                      <div className="border-b border-slate-200 p-4 space-y-3">
+                      <div className="border-b border-slate-200 p-3 space-y-2.5">
                         <div className="flex flex-wrap gap-2">
                           <button
                             type="button"
@@ -493,7 +588,7 @@ export function RealizarContatoView({
                         </div>
                       </div>
 
-                      <div className="max-h-80 overflow-auto p-2">
+                      <div className="max-h-64 overflow-auto p-2">
                         {produtosVisiveis.length === 0 ? (
                           <div className="px-3 py-2 text-sm text-slate-500">
                             Nenhum produto encontrado com esse filtro.
@@ -515,7 +610,6 @@ export function RealizarContatoView({
                                   </div>
                                   <div className="min-w-0">
                                     <p className="text-sm text-slate-900 truncate">{produto.nome}</p>
-                                    <p className="text-xs text-slate-500">{produto.codigo}</p>
                                   </div>
                                 </div>
                                 <Badge variant={estaSelecionado ? "default" : "outline"} className="shrink-0">
@@ -531,40 +625,37 @@ export function RealizarContatoView({
                 </div>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-white p-4">
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <div>
-                    <h3 className="text-sm text-slate-900">Produtos selecionados</h3>
-                    <p className="text-xs text-slate-500">
-                      {produtosSelecionados.length > 0
-                        ? `${produtosSelecionados.length} item(ns) selecionado(s)`
-                        : "Nenhum produto selecionado ainda."}
-                    </p>
-                  </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-2.5">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <h3 className="text-sm text-slate-900">Produtos selecionados</h3>
+                  <p className="text-xs text-slate-500">
+                    {produtosSelecionados.length > 0
+                      ? `${produtosSelecionados.length} item(ns)`
+                      : "Nenhum item"}
+                  </p>
                 </div>
 
                 {produtosSelecionados.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+                  <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-500">
                     Abra o menu suspenso, filtre a lista e escolha os produtos que foram ofertados neste contato.
                   </div>
                 ) : (
-                  <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                     {produtosSelecionados.map((produto) => (
                       <div
                         key={produto.id}
-                        className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+                        className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5"
                       >
                         <div className="min-w-0">
-                          <p className="text-sm text-slate-900 truncate">{produto.nome}</p>
-                          <p className="text-xs text-slate-500">{produto.codigo}</p>
+                          <p className="text-sm text-slate-900 truncate leading-tight">{produto.nome}</p>
                         </div>
                         <button
                           type="button"
                           onClick={() => removerProduto(produto.id)}
-                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
                           aria-label={`Remover ${produto.nome}`}
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ))}
@@ -573,37 +664,35 @@ export function RealizarContatoView({
               </div>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="md:col-span-12">
               <label className="block text-sm text-slate-700 mb-2">
-                Contato evolui para cotação?
+                Status do contato
               </label>
-              <p className="mt-2 text-xs text-slate-500">
-                Defina se este contato segue para cotação ou encerra o fluxo de pré-venda.
+              <p className="mt-1 text-xs text-slate-500">
+                Defina se o contato evolui para cotação, está aguardando retorno ou foi perdido.
               </p>
               <Select
                 value={evoluiParaCotacao}
                 onValueChange={(value) =>
-                  setEvoluiParaCotacao(value as EvolucaoCotacao)
+                  setEvoluiParaCotacao(value as StatusContato)
                 }
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione uma opção" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Aguardando retorno">Aguardando retorno</SelectItem>
-                  <SelectItem value="sim">Sim</SelectItem>
-                  <SelectItem value="nao">Não</SelectItem>
+                  <SelectItem value="aguardando-retorno">Aguardando retorno</SelectItem>
+                  <SelectItem value="sim">Evolui para cotação</SelectItem>
+                  <SelectItem value="nao">Contato perdido</SelectItem>
                 </SelectContent>
               </Select>
               
             </div>
 
             {precisaMotivoNaoEvolucao && (
-              <div className="md:col-span-2 rounded-xl border border-amber-200 bg-amber-50/60 p-4 space-y-4">
+              <div className="md:col-span-12 rounded-xl border border-amber-200 bg-amber-50/60 p-3 space-y-3">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-2">
-                    Motivo de não evolução
-                  </label>
+                  <label className="block text-sm text-slate-700 mb-2">Motivo da perda</label>
                   <Select
                     value={motivoNaoEvolucao}
                     onValueChange={(value) =>
@@ -629,7 +718,7 @@ export function RealizarContatoView({
                       Detalhar motivo
                     </label>
                     <Textarea
-                      rows={4}
+                      rows={3}
                       value={detalheMotivo}
                       onChange={(event) => setDetalheMotivo(event.target.value)}
                       placeholder="Explique por que este contato não evoluiu para cotação"
@@ -638,9 +727,7 @@ export function RealizarContatoView({
                   </div>
                 )}
 
-                <p className="text-xs text-slate-500">
-                  Informe o motivo para registrar o encerramento correto do contato.
-                </p>
+                <p className="text-xs text-slate-500">Informe o motivo para registrar o encerramento correto do contato.</p>
               </div>
             )}
           </div>
@@ -652,7 +739,7 @@ export function RealizarContatoView({
             </div>
           )}
 
-          <div className="mt-5 flex flex-wrap items-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-2.5">
             <button
               onClick={handleSave}
               className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"

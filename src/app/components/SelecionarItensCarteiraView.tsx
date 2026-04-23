@@ -384,15 +384,15 @@ export function SelecionarItensCarteiraView({
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-base text-slate-900 mb-4">Itens da carteira </h2>
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="text-base text-slate-900 mb-3">Itens da carteira</h2>
 
           {itensCliente.length === 0 ? (
             <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
               Nenhum item de carteira encontrado para este cliente.
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {itensCliente.map((item) => {
                 const itemState = selectionByItem[item.id];
                 const isNotIncluded = !itemState?.incluirNaCotacao;
@@ -401,25 +401,25 @@ export function SelecionarItensCarteiraView({
                 return (
                   <div
                     key={item.id}
-                    className="rounded-lg border border-slate-200 bg-white p-4"
+                    className="rounded-lg border border-slate-200 bg-white p-3"
                   >
-                    <div className="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4 items-start">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-3 items-start">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                         <div>
-                          <p className="text-xs text-slate-500">Código</p>
-                          <p className="text-slate-900 mt-1">{item.codigo}</p>
+                          <p className="text-[11px] text-slate-500">Código</p>
+                          <p className="text-sm text-slate-900 mt-0.5">{item.codigo}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-slate-500">Nome do item</p>
-                          <p className="text-slate-900 mt-1">{item.nome}</p>
+                          <p className="text-[11px] text-slate-500">Nome do item</p>
+                          <p className="text-sm text-slate-900 mt-0.5 leading-tight">{item.nome}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-slate-500">Categoria</p>
-                          <p className="text-slate-900 mt-1">{item.categoria}</p>
+                          <p className="text-[11px] text-slate-500">Categoria</p>
+                          <p className="text-sm text-slate-900 mt-0.5">{item.categoria}</p>
                         </div>
                       </div>
 
-                      <label className="inline-flex items-center gap-2 text-sm text-slate-700 xl:justify-self-end">
+                      <label className="inline-flex items-center gap-2 text-sm text-slate-700 lg:justify-self-end lg:pt-1">
                         <input
                           type="checkbox"
                           checked={itemState?.incluirNaCotacao ?? true}
@@ -433,9 +433,9 @@ export function SelecionarItensCarteiraView({
                     </div>
 
                     {isNotIncluded && (
-                      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-sm text-slate-700 mb-2">
+                          <label className="block text-xs text-slate-700 mb-1.5">
                             Motivo *
                           </label>
                           <select
@@ -449,7 +449,7 @@ export function SelecionarItensCarteiraView({
                                     : "",
                               })
                             }
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                           >
                             <option value="">Selecione um motivo</option>
                             <option value="sem interesse no momento">Sem interesse no momento</option>
@@ -462,7 +462,7 @@ export function SelecionarItensCarteiraView({
 
                         {isOutroMotivo && (
                           <div>
-                            <label className="block text-sm text-slate-700 mb-2">
+                            <label className="block text-xs text-slate-700 mb-1.5">
                               Detalhar motivo *
                             </label>
                             <input
@@ -474,7 +474,7 @@ export function SelecionarItensCarteiraView({
                                 })
                               }
                               placeholder="Descreva o motivo"
-                              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                             />
                           </div>
                         )}
