@@ -5,6 +5,7 @@ import {
   Eye,
   MessageCircle,
   Phone,
+  Plus,
   PlusCircle,
   Search,
   UserRound,
@@ -49,6 +50,21 @@ interface ContatoHistorico {
   proximoPasso: string;
   observacoes: string;
   produtosOferecidos: string[];
+}
+
+interface FollowUpContato {
+  id: number;
+  clienteId: number;
+  cliente: string;
+  data: string;
+  hora: string;
+  tipo: string;
+  responsavel: string;
+  assunto: string;
+  resultado: string;
+  resumo: string;
+  proximoPasso: string;
+  observacoes: string;
 }
 
 const clientesMock: ClienteContato[] = [
@@ -165,6 +181,99 @@ const contatosHistoricoMock: ContatoHistorico[] = [
   },
 ];
 
+const followUpsMock: FollowUpContato[] = [
+  {
+    id: 101,
+    clienteId: 1,
+    cliente: "FUNDICAO INDUSTRIAL LTDA",
+    data: "08/04/2026",
+    hora: "16:10",
+    tipo: "Follow-up",
+    responsavel: "Everton",
+    assunto: "Retorno sobre cotação revisada",
+    resultado: "Em negociação",
+    resumo:
+      "Cliente pediu ajuste leve nas condições e confirmou que vai validar internamente com a diretoria.",
+    proximoPasso: "Enviar nova versão com prazo atualizado e recontatar em 24 horas.",
+    observacoes: "Contato com boa probabilidade de evolução.",
+  },
+  {
+    id: 102,
+    clienteId: 1,
+    cliente: "FUNDICAO INDUSTRIAL LTDA",
+    data: "07/04/2026",
+    hora: "10:00",
+    tipo: "WhatsApp",
+    responsavel: "Everton",
+    assunto: "Confirmação de recebimento",
+    resultado: "Aguardando retorno",
+    resumo:
+      "Mensagem enviada para confirmar o recebimento da proposta e alinhar a agenda de decisão.",
+    proximoPasso: "Ligar no fim do dia para reforçar a proposta.",
+    observacoes: "Cliente respondeu parcialmente no WhatsApp.",
+  },
+  {
+    id: 103,
+    clienteId: 2,
+    cliente: "A FERROTEGRAO",
+    data: "08/04/2026",
+    hora: "15:25",
+    tipo: "E-mail",
+    responsavel: "Gorete",
+    assunto: "Envio de documentação comercial",
+    resultado: "Em análise",
+    resumo:
+      "E-mail com documentação e tabela comercial encaminhado para validação do time de compras.",
+    proximoPasso: "Aguardar feedback e preparar alternativa de condição comercial.",
+    observacoes: "Documentos enviados em resposta a uma solicitação interna.",
+  },
+  {
+    id: 104,
+    clienteId: 2,
+    cliente: "A FERROTEGRAO",
+    data: "06/04/2026",
+    hora: "11:50",
+    tipo: "Ligação",
+    responsavel: "Gorete",
+    assunto: "Reforço de disponibilidade",
+    resultado: "Sem decisão",
+    resumo:
+      "Ligação para reforçar disponibilidade de estoque e prazo de entrega.",
+    proximoPasso: "Tentar contato após reunião interna do cliente.",
+    observacoes: "Sem objeção imediata.",
+  },
+  {
+    id: 105,
+    clienteId: 3,
+    cliente: "A FRIDBERG DO BRASIL INDUSTRI",
+    data: "07/04/2026",
+    hora: "14:20",
+    tipo: "Reunião",
+    responsavel: "Keila",
+    assunto: "Reativação de oportunidade",
+    resultado: "Necessita ajuste",
+    resumo:
+      "Reunião para discussão de especificação técnica e reavaliação da condição comercial.",
+    proximoPasso: "Reenviar proposta ajustada e validar prazo de aprovação.",
+    observacoes: "Contato reacendido após período de inatividade.",
+  },
+  {
+    id: 106,
+    clienteId: 3,
+    cliente: "A FRIDBERG DO BRASIL INDUSTRI",
+    data: "04/04/2026",
+    hora: "09:10",
+    tipo: "E-mail",
+    responsavel: "Keila",
+    assunto: "Envio de proposta inicial",
+    resultado: "Sem retorno",
+    resumo:
+      "Envio de proposta inicial com reforço do portfólio disponível e condições base.",
+    proximoPasso: "Tentar novo contato na próxima semana.",
+    observacoes: "Sem resposta ao primeiro envio.",
+  },
+];
+
 const motivosSemCotacao = [
   "Cliente sem interesse",
   "Preço fora do esperado",
@@ -201,11 +310,24 @@ export function NovoContatoView({
   const [clienteSelecionadoId, setClienteSelecionadoId] = useState<string>("");
   const [contatoSelecionado, setContatoSelecionado] = useState<ContatoHistorico | null>(null);
   const [registroAberto, setRegistroAberto] = useState(false);
+  const [novoFollowUpAberto, setNovoFollowUpAberto] = useState(false);
+  const [followUpSelecionado, setFollowUpSelecionado] = useState<FollowUpContato | null>(null);
   const [decisaoContato, setDecisaoContato] = useState<"sim" | "nao" | "">("");
   const [motivoSemCotacao, setMotivoSemCotacao] = useState("");
   const [detalheMotivo, setDetalheMotivo] = useState("");
   const [feedbackAcao, setFeedbackAcao] = useState("");
   const [produtosAbertos, setProdutosAbertos] = useState(false);
+  const [abaDetalhesContato, setAbaDetalhesContato] = useState<"principal" | "followups">("principal");
+  const [tipoFollowUp, setTipoFollowUp] = useState("Ligação");
+  const [dataFollowUp, setDataFollowUp] = useState("");
+  const [horaFollowUp, setHoraFollowUp] = useState("");
+  const [responsavelFollowUp, setResponsavelFollowUp] = useState("");
+  const [assuntoFollowUp, setAssuntoFollowUp] = useState("");
+  const [resultadoFollowUp, setResultadoFollowUp] = useState("");
+  const [resumoFollowUp, setResumoFollowUp] = useState("");
+  const [proximoPassoFollowUp, setProximoPassoFollowUp] = useState("");
+  const [observacoesFollowUp, setObservacoesFollowUp] = useState("");
+  const [followUps, setFollowUps] = useState<FollowUpContato[]>(followUpsMock);
 
   const clientesDisponiveis = useMemo(() => {
     if (!vendedorFiltro) {
@@ -257,6 +379,20 @@ export function NovoContatoView({
       });
   }, [contatosDisponiveis, filtroCliente, filtroData, vendedorAtivoFiltro]);
 
+  const followUpsDoContatoSelecionado = useMemo(() => {
+    if (!contatoSelecionado) {
+      return [];
+    }
+
+    return [...followUps]
+      .filter((followUp) => followUp.clienteId === contatoSelecionado.clienteId)
+      .sort((a, b) => {
+        const dataB = new Date(`${converterDataParaIso(b.data)}T${b.hora}:00`).getTime();
+        const dataA = new Date(`${converterDataParaIso(a.data)}T${a.hora}:00`).getTime();
+        return dataB - dataA;
+      });
+  }, [contatoSelecionado, followUps]);
+
   const handleAvancar = () => {
     if (!clienteSelecionado) {
       return;
@@ -267,11 +403,13 @@ export function NovoContatoView({
 
   const abrirDetalhesContato = (contato: ContatoHistorico) => {
     setContatoSelecionado(contato);
+    setAbaDetalhesContato("principal");
     setDecisaoContato("");
     setMotivoSemCotacao("");
     setDetalheMotivo("");
     setFeedbackAcao("");
     setProdutosAbertos(false);
+    setFollowUpSelecionado(null);
   };
 
   const podeFinalizarSemCotacao =
@@ -314,7 +452,59 @@ export function NovoContatoView({
     if (!open) {
       setContatoSelecionado(null);
       setProdutosAbertos(false);
+      setNovoFollowUpAberto(false);
+      setFollowUpSelecionado(null);
+      setAbaDetalhesContato("principal");
     }
+  };
+
+  const abrirNovoFollowUp = () => {
+    if (!contatoSelecionado) {
+      return;
+    }
+
+    setTipoFollowUp("Ligação");
+    setDataFollowUp(converterDataParaIso(contatoSelecionado.data));
+    setHoraFollowUp(contatoSelecionado.hora);
+    setResponsavelFollowUp(contatoSelecionado.responsavel);
+    setAssuntoFollowUp("");
+    setResultadoFollowUp("");
+    setResumoFollowUp("");
+    setProximoPassoFollowUp("");
+    setObservacoesFollowUp("");
+    setNovoFollowUpAberto(true);
+  };
+
+  const confirmarNovoFollowUp = () => {
+    if (!contatoSelecionado) {
+      return;
+    }
+
+    if (!dataFollowUp || !horaFollowUp || !responsavelFollowUp.trim() || !assuntoFollowUp.trim() || !resultadoFollowUp.trim() || !resumoFollowUp.trim()) {
+      return;
+    }
+
+    const novaInteracao: FollowUpContato = {
+      id: Date.now(),
+      clienteId: contatoSelecionado.clienteId,
+      cliente: contatoSelecionado.cliente,
+      data: new Date(`${dataFollowUp}T00:00:00`).toLocaleDateString("pt-BR"),
+      hora: horaFollowUp,
+      tipo: tipoFollowUp,
+      responsavel: responsavelFollowUp.trim(),
+      assunto: assuntoFollowUp.trim(),
+      resultado: resultadoFollowUp.trim(),
+      resumo: resumoFollowUp.trim(),
+      proximoPasso: proximoPassoFollowUp.trim(),
+      observacoes: observacoesFollowUp.trim(),
+    };
+
+    setFollowUps((previous) => [novaInteracao, ...previous]);
+    setNovoFollowUpAberto(false);
+  };
+
+  const abrirDetalheFollowUp = (followUp: FollowUpContato) => {
+    setFollowUpSelecionado(followUp);
   };
 
   return (
@@ -505,8 +695,52 @@ export function NovoContatoView({
 
           {contatoSelecionado && (
             <div className="space-y-4 text-sm">
-              <section className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h3 className="text-slate-900 mb-3">Resumo executivo</h3>
+              <section className="rounded-xl border border-slate-200 bg-white p-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setAbaDetalhesContato("principal")}
+                    className={`px-4 py-2 text-sm rounded-lg transition-colors ${
+                      abaDetalhesContato === "principal"
+                        ? "bg-slate-800 text-white"
+                        : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100"
+                    }`}
+                  >
+                    Visão principal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAbaDetalhesContato("followups")}
+                    className={`px-4 py-2 text-sm rounded-lg transition-colors ${
+                      abaDetalhesContato === "followups"
+                        ? "bg-slate-800 text-white"
+                        : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100"
+                    }`}
+                  >
+                    Follow-ups
+                  </button>
+                </div>
+              </section>
+
+              {abaDetalhesContato === "principal" && (
+              <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-slate-900">Visão principal</h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Resumo do contato selecionado e seus dados principais.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={abrirNovoFollowUp}
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Novo follow up
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <p className="text-xs text-slate-500">Cliente</p>
@@ -524,149 +758,252 @@ export function NovoContatoView({
                     <p className="text-xs text-slate-500">Responsável</p>
                     <p className="text-slate-900 mt-1">{contatoSelecionado.responsavel}</p>
                   </div>
-                </div>
-              </section>
-
-              <section className="rounded-xl border border-slate-200 bg-white p-4">
-                <h3 className="text-slate-900 mb-3">Status e resultado</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                    <p className="text-xs text-slate-500">Assunto</p>
-                    <p className="text-slate-900 mt-1">{contatoSelecionado.resultado}</p>
-                  </div>
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 md:col-span-2">
-                    <p className="text-xs text-slate-500">Resultado do contato</p>
+                  <div className="md:col-span-2 rounded-lg border border-slate-200 bg-white px-4 py-3">
+                    <p className="text-xs text-slate-500">Resumo do contato</p>
                     <p className="text-slate-900 mt-1 leading-relaxed">{contatoSelecionado.resumo}</p>
                   </div>
+                  <div className="md:col-span-2 rounded-lg border border-slate-200 bg-white px-4 py-3">
+                    <p className="text-xs text-slate-500">Próximo passo</p>
+                    <p className="text-slate-900 mt-1 leading-relaxed">{contatoSelecionado.proximoPasso}</p>
+                  </div>
+                  <div className="md:col-span-2 rounded-lg border border-slate-200 bg-white px-4 py-3">
+                    <p className="text-xs text-slate-500">Observações</p>
+                    <p className="text-slate-900 mt-1 leading-relaxed">{contatoSelecionado.observacoes}</p>
+                  </div>
+                  <div className="md:col-span-2 rounded-lg border border-slate-200 bg-white px-4 py-3">
+                    <p className="text-xs text-slate-500">Produtos oferecidos</p>
+                    <p className="text-slate-900 mt-1">{contatoSelecionado.produtosOferecidos.join(" • ")}</p>
+                  </div>
                 </div>
               </section>
+              )}
 
-              <section className="rounded-xl border border-slate-200 bg-white p-4">
-                <button
-                  type="button"
-                  onClick={() => setProdutosAbertos((previous) => !previous)}
-                  className="w-full flex items-center justify-between gap-3 text-left"
-                >
-                  <div>
-                    <h3 className="text-slate-900">Produtos oferecidos ao cliente</h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {contatoSelecionado.produtosOferecidos.length} item(ns) oferecido(s)
-                    </p>
-                  </div>
-                  <ChevronDown
-                    className={`h-4 w-4 text-slate-500 transition-transform ${produtosAbertos ? "rotate-180" : ""}`}
-                  />
-                </button>
-
-                {produtosAbertos && (
-                  <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <div className="max-h-56 overflow-y-auto pr-1">
-                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                        {contatoSelecionado.produtosOferecidos.map((produto) => (
-                          <div
-                            key={produto}
-                            className="rounded-lg border border-slate-200 bg-white px-3 py-2"
-                          >
-                            <p className="text-sm text-slate-900 truncate">{produto}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </section>
-
-              <section className="rounded-xl border border-slate-200 bg-white p-4">
-                <h3 className="text-slate-900 mb-3">Encaminhamento do contato</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                  <button
-                    onClick={() => {
-                      setDecisaoContato("sim");
-                      setMotivoSemCotacao("");
-                      setDetalheMotivo("");
-                      setFeedbackAcao("");
-                    }}
-                    className={`rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
-                      decisaoContato === "sim"
-                        ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-                        : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                    }`}
-                  >
-                    Evoluir para cotação
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setDecisaoContato("nao");
-                      setFeedbackAcao("");
-                    }}
-                    className={`rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
-                      decisaoContato === "nao"
-                        ? "border-amber-300 bg-amber-50 text-amber-800"
-                        : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                    }`}
-                  >
-                    Finalizar sem cotação
-                  </button>
-                </div>
-
-                {decisaoContato === "nao" && (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs text-slate-500 mb-2">Motivo</label>
-                      <select
-                        value={motivoSemCotacao}
-                        onChange={(event) => setMotivoSemCotacao(event.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
-                      >
-                        <option value="">Selecione um motivo</option>
-                        {motivosSemCotacao.map((motivo) => (
-                          <option key={motivo} value={motivo}>
-                            {motivo}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {motivoSemCotacao === "Outro" && (
+              {abaDetalhesContato === "followups" && (
+                <section className="space-y-4">
+                  <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <label className="block text-xs text-slate-500 mb-2">Detalhe do motivo</label>
-                        <textarea
-                          rows={3}
-                          value={detalheMotivo}
-                          onChange={(event) => setDetalheMotivo(event.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
-                          placeholder="Descreva o motivo do encerramento"
-                        />
+                        <h3 className="text-slate-900">Follow-ups associados</h3>
+                        <p className="text-xs text-slate-500 mt-1">
+                          {followUpsDoContatoSelecionado.length} registro(s) encontrado(s)
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={abrirNovoFollowUp}
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Novo follow up
+                      </button>
+                    </div>
+
+                    {followUpsDoContatoSelecionado.length === 0 ? (
+                      <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                        Nenhum follow-up registrado para este contato.
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {followUpsDoContatoSelecionado.map((followUp) => (
+                          <button
+                            key={followUp.id}
+                            type="button"
+                            onClick={() => abrirDetalheFollowUp(followUp)}
+                            className="w-full text-left rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 hover:bg-slate-100 hover:border-slate-300 transition-colors"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <p className="text-sm text-slate-900">{followUp.tipo}</p>
+                                  <span className="text-[11px] rounded-full border border-slate-200 bg-white px-2 py-0.5 text-slate-600">
+                                    {followUp.resultado}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-1">
+                                  {formatarDataHora(followUp.data, followUp.hora)} • {followUp.responsavel}
+                                </p>
+                                <p className="text-sm text-slate-700 mt-2 line-clamp-2">{followUp.resumo}</p>
+                              </div>
+                              <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 shrink-0">
+                                <Eye className="w-3.5 h-3.5" />
+                                Detalhes
+                              </span>
+                            </div>
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>
-                )}
+                </section>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
-                {feedbackAcao && (
-                  <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-xs px-3 py-2">
-                    {feedbackAcao}
-                  </div>
-                )}
+      <Dialog open={novoFollowUpAberto} onOpenChange={setNovoFollowUpAberto}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Novo follow up</DialogTitle>
+            <DialogDescription>
+              Registre um novo follow-up para este contato sem sair da tela de detalhes.
+            </DialogDescription>
+          </DialogHeader>
 
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={handleConfirmarEncaminhamento}
-                    disabled={
-                      decisaoContato === "" ||
-                      (decisaoContato === "nao" && !podeFinalizarSemCotacao)
-                    }
-                    className="px-4 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {decisaoContato === "sim"
-                      ? "Confirmar evolução para cotação"
-                      : decisaoContato === "nao"
-                        ? "Confirmar encerramento sem cotação"
-                        : "Confirme uma opção"}
-                  </button>
+          <div className="space-y-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Tipo</label>
+                <select
+                  value={tipoFollowUp}
+                  onChange={(event) => setTipoFollowUp(event.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                >
+                  <option value="Ligação">Ligação</option>
+                  <option value="E-mail">E-mail</option>
+                  <option value="WhatsApp">WhatsApp</option>
+                  <option value="Reunião">Reunião</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Data</label>
+                <input
+                  type="date"
+                  value={dataFollowUp}
+                  onChange={(event) => setDataFollowUp(event.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Hora</label>
+                <input
+                  type="time"
+                  value={horaFollowUp}
+                  onChange={(event) => setHoraFollowUp(event.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Responsável</label>
+                <input
+                  type="text"
+                  value={responsavelFollowUp}
+                  onChange={(event) => setResponsavelFollowUp(event.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Assunto</label>
+                <input
+                  type="text"
+                  value={assuntoFollowUp}
+                  onChange={(event) => setAssuntoFollowUp(event.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Resultado</label>
+                <input
+                  type="text"
+                  value={resultadoFollowUp}
+                  onChange={(event) => setResultadoFollowUp(event.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Próximo passo</label>
+                <input
+                  type="text"
+                  value={proximoPassoFollowUp}
+                  onChange={(event) => setProximoPassoFollowUp(event.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">Resumo</label>
+              <textarea
+                rows={3}
+                value={resumoFollowUp}
+                onChange={(event) => setResumoFollowUp(event.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">Observações</label>
+              <textarea
+                rows={3}
+                value={observacoesFollowUp}
+                onChange={(event) => setObservacoesFollowUp(event.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setNovoFollowUpAberto(false)}
+              className="px-4 py-2 border border-slate-300 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={confirmarNovoFollowUp}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Salvar follow up
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(followUpSelecionado)} onOpenChange={(open) => !open && setFollowUpSelecionado(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Detalhes do follow up</DialogTitle>
+            <DialogDescription>
+              Visualização completa do registro selecionado.
+            </DialogDescription>
+          </DialogHeader>
+
+          {followUpSelecionado && (
+            <div className="space-y-3 text-sm">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs text-slate-500">Assunto</p>
+                <p className="text-slate-900 mt-1">{followUpSelecionado.assunto}</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">Data e hora</p>
+                  <p className="text-slate-900 mt-1">{formatarDataHora(followUpSelecionado.data, followUpSelecionado.hora)}</p>
                 </div>
-              </section>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">Responsável</p>
+                  <p className="text-slate-900 mt-1">{followUpSelecionado.responsavel}</p>
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <p className="text-xs text-slate-500">Tipo / resultado</p>
+                <p className="text-slate-900 mt-1">{followUpSelecionado.tipo} • {followUpSelecionado.resultado}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <p className="text-xs text-slate-500">Resumo</p>
+                <p className="text-slate-900 mt-1 leading-relaxed">{followUpSelecionado.resumo}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <p className="text-xs text-slate-500">Próximo passo</p>
+                <p className="text-slate-900 mt-1 leading-relaxed">{followUpSelecionado.proximoPasso}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <p className="text-xs text-slate-500">Observações</p>
+                <p className="text-slate-900 mt-1 leading-relaxed">{followUpSelecionado.observacoes || "Sem observações"}</p>
+              </div>
             </div>
           )}
         </DialogContent>

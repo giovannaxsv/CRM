@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ChevronRight, Mail, Send } from "lucide-react";
+import { ArrowLeft, ChevronRight, Mail, Plus, Send } from "lucide-react";
 import {
   cotacoesMock,
   type CotacaoAtualizacaoLocal,
@@ -289,40 +289,76 @@ function buildCotacaoDetalhada(
 }
 
 function buildInteracoesMock(cotacao: CotacaoDetalhada): InteracaoFollowUp[] {
-  if (cotacao.id !== 1) {
-    return [];
+  const responsavel = cotacao.responsavel;
+
+  if (cotacao.id === 1) {
+    return [
+      {
+        id: 1001,
+        tipo: "ligacao",
+        data: "2026-04-03",
+        responsavel,
+        resumo:
+          "Primeiro contato para confirmar recebimento da proposta e validar prioridade de decisao.",
+        proximoPasso: "Enviar e-mail com resumo das condicoes discutidas.",
+        criadaEm: "2026-04-03T10:15:00",
+      },
+      {
+        id: 1002,
+        tipo: "email",
+        data: "2026-04-04",
+        responsavel,
+        resumo:
+          "E-mail enviado com condicoes comerciais e detalhamento de prazo de entrega.",
+        proximoPasso: "Retomar por WhatsApp em 48 horas para alinhamento final.",
+        criadaEm: "2026-04-04T14:35:00",
+      },
+      {
+        id: 1003,
+        tipo: "whatsapp",
+        data: "2026-04-06",
+        responsavel,
+        resumo:
+          "Cliente sinalizou interesse, mas solicitou revisao de prazo para fechamento interno.",
+        proximoPasso: "Agendar reuniao curta para decisao comercial.",
+        criadaEm: "2026-04-06T09:20:00",
+      },
+    ];
   }
+
+  const baseId = cotacao.id * 1000;
+  const codigo = cotacao.codigo;
 
   return [
     {
-      id: 1001,
-      tipo: "ligacao",
-      data: "2026-04-03",
-      responsavel: "Everton",
-      resumo:
-        "Primeiro contato para confirmar recebimento da proposta e validar prioridade de decisao.",
-      proximoPasso: "Enviar e-mail com resumo das condicoes discutidas.",
-      criadaEm: "2026-04-03T10:15:00",
-    },
-    {
-      id: 1002,
+      id: baseId + 1,
       tipo: "email",
-      data: "2026-04-04",
-      responsavel: "Everton",
+      data: "2026-04-10",
+      responsavel,
       resumo:
-        "E-mail enviado com condicoes comerciais e detalhamento de prazo de entrega.",
-      proximoPasso: "Retomar por WhatsApp em 48 horas para alinhamento final.",
-      criadaEm: "2026-04-04T14:35:00",
+        `Envio inicial da cotacao ${codigo} com resumo das condicoes comerciais e prazo proposto.`,
+      proximoPasso: "Realizar follow-up por telefone para validar recebimento.",
+      criadaEm: "2026-04-10T11:05:00",
     },
     {
-      id: 1003,
-      tipo: "whatsapp",
-      data: "2026-04-06",
-      responsavel: "Everton",
+      id: baseId + 2,
+      tipo: "ligacao",
+      data: "2026-04-12",
+      responsavel,
       resumo:
-        "Cliente sinalizou interesse, mas solicitou revisao de prazo para fechamento interno.",
-      proximoPasso: "Agendar reuniao curta para decisao comercial.",
-      criadaEm: "2026-04-06T09:20:00",
+        "Contato telefonico para esclarecer duvidas sobre condicoes de pagamento e lead time.",
+      proximoPasso: "Aguardar retorno interno do cliente com validacao do comprador.",
+      criadaEm: "2026-04-12T15:40:00",
+    },
+    {
+      id: baseId + 3,
+      tipo: "whatsapp",
+      data: "2026-04-14",
+      responsavel,
+      resumo:
+        "Mensagem enviada com reforco da proposta e disponibilidade para ajuste fino comercial.",
+      proximoPasso: "Agendar reuniao de fechamento caso cliente confirme interesse.",
+      criadaEm: "2026-04-14T09:10:00",
     },
   ];
 }
@@ -354,6 +390,10 @@ export function CotacaoCompletaView({
   const [clienteRespondeu, setClienteRespondeu] = useState<"sim" | "nao">("sim");
   const [encerradoSemRetorno, setEncerradoSemRetorno] = useState(false);
   const [feedbackFollowUp, setFeedbackFollowUp] = useState("");
+  const [novoFollowUpOpen, setNovoFollowUpOpen] = useState(false);
+  const [detalheFollowUpOpen, setDetalheFollowUpOpen] = useState(false);
+  const [followUpSelecionado, setFollowUpSelecionado] =
+    useState<InteracaoFollowUp | null>(null);
   const [interacoes, setInteracoes] = useState<InteracaoFollowUp[]>(
     cotacao ? buildInteracoesMock(cotacao) : [],
   );
@@ -402,6 +442,13 @@ export function CotacaoCompletaView({
     return buildEmailCotacao(cotacao);
   }, [cotacao]);
 
+  const interacoesOrdenadas = useMemo(() => {
+    return [...interacoes].sort(
+      (a, b) =>
+        new Date(b.criadaEm).getTime() - new Date(a.criadaEm).getTime(),
+    );
+  }, [interacoes]);
+
   const handleAbrirEmail = () => {
     setDestinatarioEmail("");
     setFeedbackEmail("");
@@ -423,6 +470,23 @@ export function CotacaoCompletaView({
     setMotivoPerdaOutro("");
     setFeedbackPerda("");
     setPerdaOpen(true);
+  };
+
+  const handleAbrirNovoFollowUp = () => {
+    setTipoInteracao("ligacao");
+    setDataInteracao(getTodayInputDate());
+    setResponsavelInteracao(cotacao.responsavel);
+    setResumoInteracao("");
+    setProximoPassoInteracao("");
+    setClienteRespondeu("sim");
+    setEncerradoSemRetorno(false);
+    setFeedbackFollowUp("");
+    setNovoFollowUpOpen(true);
+  };
+
+  const handleAbrirDetalheFollowUp = (interacao: InteracaoFollowUp) => {
+    setFollowUpSelecionado(interacao);
+    setDetalheFollowUpOpen(true);
   };
 
   const handleConfirmarPerda = () => {
@@ -480,12 +544,12 @@ export function CotacaoCompletaView({
     setInteracoes((prev) => [novaInteracao, ...prev]);
     setResumoInteracao("");
     setProximoPassoInteracao("");
-    setFeedbackFollowUp("Interação registrada no acompanhamento.");
-  };
-
-  const handleEncerrarSemRetorno = () => {
-    setEncerradoSemRetorno(true);
-    setFeedbackFollowUp("Acompanhamento marcado como encerrado sem retorno.");
+    setNovoFollowUpOpen(false);
+    setFeedbackFollowUp(
+      clienteRespondeu === "nao" && encerradoSemRetorno
+        ? "Interação registrada e acompanhamento marcado como encerrado sem retorno."
+        : "Interação registrada no acompanhamento.",
+    );
   };
 
   const cotacaoPerdida = cotacao.etapa === "PERDIDA";
@@ -785,76 +849,139 @@ export function CotacaoCompletaView({
             <div>
               <h2 className="text-base text-slate-900">Acompanhamento</h2>
               <p className="text-sm text-slate-500 mt-1">
-                Registre interações comerciais após o envio da cotação.
+                Visualize os últimos follow-ups registrados desta cotação.
               </p>
             </div>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-              {encerradoSemRetorno ? "Status: Encerrado sem retorno" : "Status: Em acompanhamento"}
+            <div className="flex items-center gap-2">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                {encerradoSemRetorno ? "Status: Encerrado sem retorno" : "Status: Em acompanhamento"}
+              </div>
+              <button
+                onClick={handleAbrirNovoFollowUp}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Novo follow up
+              </button>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Tipo de interação</label>
-                <select
-                  value={tipoInteracao}
-                  onChange={(event) => setTipoInteracao(event.target.value as TipoInteracaoFollowUp)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                >
-                  <option value="ligacao">Ligação</option>
-                  <option value="email">E-mail</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="reuniao">Reunião</option>
-                  <option value="observacao_interna">Observação interna</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Data</label>
-                <input
-                  type="date"
-                  value={dataInteracao}
-                  onChange={(event) => setDataInteracao(event.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Responsável</label>
-                <input
-                  type="text"
-                  value={responsavelInteracao}
-                  onChange={(event) => setResponsavelInteracao(event.target.value)}
-                  placeholder="Nome do responsável"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                />
-              </div>
-            </div>
+          <div className="space-y-3">
+            <h3 className="text-sm text-slate-700">Últimos follow-ups registrados</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Resumo / observação</label>
-                <textarea
-                  rows={3}
-                  value={resumoInteracao}
-                  onChange={(event) => setResumoInteracao(event.target.value)}
-                  placeholder="Ex.: Cliente solicitou retorno com condição de pagamento alternativa."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                />
+            {interacoesOrdenadas.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-500">
+                Nenhuma interação registrada até o momento.
               </div>
-              <div>
-                <label className="block text-sm text-slate-700 mb-2">Próximo passo</label>
-                <textarea
-                  rows={3}
-                  value={proximoPassoInteracao}
-                  onChange={(event) => setProximoPassoInteracao(event.target.value)}
-                  placeholder="Ex.: Nova ligação em 2 dias para validar decisão."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                />
+            ) : (
+              <div className="space-y-3">
+                {interacoesOrdenadas.map((interacao) => (
+                  <button
+                    key={interacao.id}
+                    type="button"
+                    onClick={() => handleAbrirDetalheFollowUp(interacao)}
+                    className="w-full text-left relative rounded-lg border border-slate-200 bg-white px-4 py-3 hover:border-slate-300 hover:bg-slate-50 transition-colors"
+                  >
+                    <span className="absolute left-0 top-0 h-full w-1 rounded-l-lg bg-slate-300" />
+                    <div className="ml-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-sm text-slate-900">
+                          {getTipoInteracaoLabel(interacao.tipo)}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          Registro: {toDateTime(interacao.criadaEm)}
+                        </p>
+                      </div>
+                      <p className="text-xs text-slate-600 mt-1">
+                        Data da interação: {toDate(interacao.data)} | Responsável: {interacao.responsavel}
+                      </p>
+                      <p className="text-sm text-slate-700 mt-2 line-clamp-2">{interacao.resumo}</p>
+                      <p className="text-xs text-slate-500 mt-2">Clique para ver detalhes</p>
+                    </div>
+                  </button>
+                ))}
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
+          {feedbackFollowUp && (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-700 px-4 py-2">
+              {feedbackFollowUp}
+            </div>
+          )}
+        </section>
+        )}
+
+        <Dialog open={novoFollowUpOpen} onOpenChange={setNovoFollowUpOpen}>
+          <DialogContent className="sm:max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Novo follow up</DialogTitle>
+              <DialogDescription>
+                Registre uma nova interação comercial desta cotação.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Tipo de interação</label>
+                  <select
+                    value={tipoInteracao}
+                    onChange={(event) => setTipoInteracao(event.target.value as TipoInteracaoFollowUp)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  >
+                    <option value="ligacao">Ligação</option>
+                    <option value="email">E-mail</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="reuniao">Reunião</option>
+                    <option value="observacao_interna">Observação interna</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Data</label>
+                  <input
+                    type="date"
+                    value={dataInteracao}
+                    onChange={(event) => setDataInteracao(event.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Responsável</label>
+                  <input
+                    type="text"
+                    value={responsavelInteracao}
+                    onChange={(event) => setResponsavelInteracao(event.target.value)}
+                    placeholder="Nome do responsável"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Resumo / observação</label>
+                  <textarea
+                    rows={4}
+                    value={resumoInteracao}
+                    onChange={(event) => setResumoInteracao(event.target.value)}
+                    placeholder="Ex.: Cliente solicitou retorno com condição de pagamento alternativa."
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">Próximo passo</label>
+                  <textarea
+                    rows={4}
+                    value={proximoPassoInteracao}
+                    onChange={(event) => setProximoPassoInteracao(event.target.value)}
+                    placeholder="Ex.: Nova ligação em 2 dias para validar decisão."
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <p className="text-sm text-slate-700 mb-2">Cliente respondeu?</p>
                 <div className="flex items-center gap-5 text-sm text-slate-700">
                   <label className="inline-flex items-center gap-2">
@@ -875,80 +1002,100 @@ export function CotacaoCompletaView({
                       type="radio"
                       name="cliente-respondeu"
                       checked={clienteRespondeu === "nao"}
-                      onChange={() => setClienteRespondeu("nao")}
+                      onChange={() => {
+                        setClienteRespondeu("nao");
+                        setEncerradoSemRetorno(false);
+                      }}
                       className="accent-slate-800"
                     />
                     Não
                   </label>
                 </div>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-2">
                 {clienteRespondeu === "nao" && (
-                  <button
-                    onClick={handleEncerrarSemRetorno}
-                    className="px-4 py-2 border border-amber-300 bg-amber-50 text-amber-800 text-sm rounded-lg hover:bg-amber-100 transition-colors"
-                  >
-                    Encerrar sem retorno
-                  </button>
+                  <label className="mt-3 inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={encerradoSemRetorno}
+                      onChange={(event) => setEncerradoSemRetorno(event.target.checked)}
+                      className="accent-slate-800"
+                    />
+                    Encerrar acompanhamento sem retorno
+                  </label>
                 )}
-                <button
-                  onClick={handleRegistrarInteracao}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
-                >
-                  Registrar interação
-                </button>
               </div>
             </div>
 
-            {feedbackFollowUp && (
-              <div className="rounded-lg border border-slate-200 bg-white text-sm text-slate-700 px-4 py-2">
-                {feedbackFollowUp}
-              </div>
-            )}
-          </div>
+            <DialogFooter>
+              <button
+                onClick={() => setNovoFollowUpOpen(false)}
+                className="px-4 py-2 border border-slate-300 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleRegistrarInteracao}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Salvar follow up
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-          <div className="space-y-3">
-            <h3 className="text-sm text-slate-700">Linha do tempo de interações</h3>
+        <Dialog open={detalheFollowUpOpen} onOpenChange={setDetalheFollowUpOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Detalhe do follow up</DialogTitle>
+              <DialogDescription>
+                Informações completas da interação selecionada.
+              </DialogDescription>
+            </DialogHeader>
 
-            {interacoes.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-500">
-                Nenhuma interação registrada até o momento.
+            {followUpSelecionado ? (
+              <div className="space-y-3 text-sm">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <p className="text-xs text-slate-500">Tipo</p>
+                  <p className="text-slate-900 mt-1">{getTipoInteracaoLabel(followUpSelecionado.tipo)}</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                    <p className="text-xs text-slate-500">Data da interação</p>
+                    <p className="text-slate-900 mt-1">{toDate(followUpSelecionado.data)}</p>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                    <p className="text-xs text-slate-500">Responsável</p>
+                    <p className="text-slate-900 mt-1">{followUpSelecionado.responsavel}</p>
+                  </div>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <p className="text-xs text-slate-500">Resumo</p>
+                  <p className="text-slate-900 mt-1 whitespace-pre-wrap">{followUpSelecionado.resumo}</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <p className="text-xs text-slate-500">Próximo passo</p>
+                  <p className="text-slate-900 mt-1 whitespace-pre-wrap">
+                    {followUpSelecionado.proximoPasso || "Não informado"}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <p className="text-xs text-slate-500">Registro criado em</p>
+                  <p className="text-slate-900 mt-1">{toDateTime(followUpSelecionado.criadaEm)}</p>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {interacoes.map((interacao) => (
-                  <article
-                    key={interacao.id}
-                    className="relative rounded-lg border border-slate-200 bg-white px-4 py-3"
-                  >
-                    <span className="absolute left-0 top-0 h-full w-1 rounded-l-lg bg-slate-300" />
-                    <div className="ml-2">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-sm text-slate-900">
-                          {getTipoInteracaoLabel(interacao.tipo)}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          Registro: {toDateTime(interacao.criadaEm)}
-                        </p>
-                      </div>
-                      <p className="text-xs text-slate-600 mt-1">
-                        Data da interação: {toDate(interacao.data)} | Responsável: {interacao.responsavel}
-                      </p>
-                      <p className="text-sm text-slate-700 mt-2">{interacao.resumo}</p>
-                      {interacao.proximoPasso && (
-                        <p className="text-sm text-slate-600 mt-2">
-                          Próximo passo: {interacao.proximoPasso}
-                        </p>
-                      )}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-        )}
+            ) : null}
+
+            <DialogFooter>
+              <button
+                onClick={() => setDetalheFollowUpOpen(false)}
+                className="px-4 py-2 border border-slate-300 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                Fechar
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
           <DialogContent className="sm:max-w-2xl">

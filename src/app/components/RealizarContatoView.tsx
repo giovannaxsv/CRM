@@ -285,8 +285,8 @@ export function RealizarContatoView({
     evoluiParaCotacao === "nao"
       ? "Salvar e marcar como perdido"
       : evoluiParaCotacao === "sim"
-        ? "Salvar e selecionar itens"
-        : "Salvar e selecionar itens";
+        ? "Salvar e selecionar itens para cotação"
+        : "Salvar e selecionar itens para cotação";
 
   const alternarProduto = (produtoId: number) => {
     setProdutosSelecionadosIds((previous) => {

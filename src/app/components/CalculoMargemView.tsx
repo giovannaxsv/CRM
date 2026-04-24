@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ChevronRight, Save } from "lucide-react";
+import { ArrowDown, ArrowLeft, ChevronRight, Save } from "lucide-react";
 import { produtosReais } from "../../imports/produtosReais";
+import { Switch } from "./ui/switch";
 
 interface CalculoMargemViewProps {
   clientId: number | null;
@@ -246,10 +247,17 @@ export function CalculoMargemView({
   const [cotacaoPorProduto, setCotacaoPorProduto] = useState<
     Record<number, ProdutoCotacaoState>
   >(() => buildInitialCotacaoPorProduto(produtosSelecionados));
+  const [produtoExpandidoPorId, setProdutoExpandidoPorId] = useState<Record<number, boolean>>({});
   const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
     setCotacaoPorProduto(buildInitialCotacaoPorProduto(produtosSelecionados));
+    setProdutoExpandidoPorId(
+      produtosSelecionados.reduce<Record<number, boolean>>((accumulator, produto) => {
+        accumulator[produto.id] = true;
+        return accumulator;
+      }, {}),
+    );
   }, [produtosSelecionados]);
 
   if (!selected) {
@@ -308,6 +316,13 @@ export function CalculoMargemView({
 
   const handleSalvarCalculo = () => {
     setFeedback("Cálculo salvo com sucesso.");
+  };
+
+  const handleToggleProduto = (produtoId: number) => {
+    setProdutoExpandidoPorId((previousState) => ({
+      ...previousState,
+      [produtoId]: !previousState[produtoId],
+    }));
   };
 
   return (
@@ -383,6 +398,16 @@ export function CalculoMargemView({
                 const margemMaiorLote = calculateMargem(receitaLiquidaAposIcms, custoMaiorLote);
                 const margemSimulada = calculateMargem(receitaLiquidaAposIcms, custoSimulado);
                 const aprovado = form.preco >= custosFixosPorCodigo.precoMinimo;
+                const statusAnalise = !form.codigo
+                  ? "Pendente"
+                  : aprovado
+                    ? "Dentro da regra"
+                    : "Abaixo do mínimo";
+                const statusAnaliseClasses = !form.codigo
+                  ? "bg-slate-100 text-slate-700 border-slate-200"
+                  : aprovado
+                    ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                    : "bg-amber-100 text-amber-800 border-amber-200";
 
                 const percentualTotalMistura = form.materiaisMistura.reduce(
                   (accumulator, material) => accumulator + material.percentual,
@@ -409,30 +434,42 @@ export function CalculoMargemView({
                     : 0;
 
                 return (
-                  <div key={produto.id} className="rounded-lg border border-slate-300 bg-white overflow-hidden">
-                    <div className="bg-[#21386b] text-white px-3 py-2 flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-sm">
+                  <article key={produto.id} className="rounded-xl border border-slate-300 bg-white overflow-hidden">
+                    <div className="bg-[#21386b] text-white px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm md:text-base">
                         <span className="font-medium">{produto.nome}</span>
                         <span className="ml-2 text-slate-200">Consumo: {produto.consumo}</span>
                       </p>
-                      {form.codigo && (
+                      <div className="flex items-center gap-2">
                         <span
-                          className={`text-xs font-semibold px-2 py-1 rounded-full border ${
-                            aprovado
-                              ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                              : "bg-amber-100 text-amber-800 border-amber-200"
-                          }`}
+                          className={`text-xs font-semibold px-2 py-1 rounded-full border ${statusAnaliseClasses}`}
                         >
-                          {aprovado ? "Aprovado" : "Pendente de aprovação"}
+                          {statusAnalise}
                         </span>
-                      )}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleProduto(produto.id)}
+                          aria-expanded={produtoExpandidoPorId[produto.id] ?? true}
+                          className="inline-flex items-center gap-1 rounded-md border border-white/40 bg-white/10 px-2 py-1 text-xs font-medium hover:bg-white/20"
+                        >
+                          <ArrowDown
+                            className={`h-3.5 w-3.5 transition-transform ${(produtoExpandidoPorId[produto.id] ?? true) ? "rotate-180" : "rotate-0"}`}
+                          />
+                          {(produtoExpandidoPorId[produto.id] ?? true) ? "Recolher" : "Expandir"}
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="p-3 grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-3">
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-9 gap-2">
-                          <div>
-                            <label className="block text-xs text-slate-700 mb-1">Código</label>
+                    {(produtoExpandidoPorId[produto.id] ?? true) && (
+                      <div className="p-4 space-y-4">
+                      <section className="rounded-lg border border-slate-200 bg-slate-50 p-3 md:p-4 space-y-3">
+                        <h3 className="text-sm text-slate-900">Dados comerciais</h3>
+
+                        <div className="flex flex-wrap gap-3">
+                          <div className="w-full md:w-[220px]">
+                            <label className="block text-xs text-slate-700 mb-1">
+                              Código <span className="text-rose-600">*</span>
+                            </label>
                             <select
                               value={form.codigo}
                               onChange={(event) => {
@@ -444,7 +481,7 @@ export function CalculoMargemView({
                                   preco: custosPorCodigo?.precoMeta ?? 0,
                                 });
                               }}
-                              className="h-9 w-full px-2.5 text-sm border border-slate-300 rounded-md bg-white"
+                              className="h-9 w-full xl:max-w-[220px] px-2.5 text-sm border border-slate-300 rounded-md bg-white"
                             >
                               <option value="">Selecione o código</option>
                               {codigosProdutoMock.map((codigo) => (
@@ -455,7 +492,7 @@ export function CalculoMargemView({
                             </select>
                           </div>
 
-                          <div>
+                          <div className="w-full md:w-[110px]">
                             <label className="block text-xs text-slate-700 mb-1">ICMS</label>
                             <select
                               value={form.icmsProduto}
@@ -464,7 +501,7 @@ export function CalculoMargemView({
                                   icmsProduto: Number(event.target.value),
                                 })
                               }
-                              className="h-9 w-full px-2.5 text-sm border border-slate-300 rounded-md bg-white"
+                              className="h-9 w-full xl:max-w-[110px] px-2.5 text-sm border border-slate-300 rounded-md bg-white"
                             >
                               <option value={4}>4%</option>
                               <option value={7}>7%</option>
@@ -472,7 +509,7 @@ export function CalculoMargemView({
                             </select>
                           </div>
 
-                          <div>
+                          <div className="w-full md:w-[220px]">
                             <label className="block text-xs text-slate-700 mb-1">Embalagem</label>
                             <select
                               value={form.embalagem}
@@ -481,7 +518,7 @@ export function CalculoMargemView({
                                   embalagem: event.target.value,
                                 })
                               }
-                              className="h-9 w-full px-2.5 text-sm border border-slate-300 rounded-md bg-white"
+                              className="h-9 w-full xl:max-w-[220px] px-2.5 text-sm border border-slate-300 rounded-md bg-white"
                             >
                               <option value="">Selecione a embalagem</option>
                               <option value="balde">balde</option>
@@ -490,7 +527,7 @@ export function CalculoMargemView({
                             </select>
                           </div>
 
-                          <div>
+                          <div className="w-full md:w-[170px]">
                             <label className="block text-xs text-slate-700 mb-1">Entrega prevista</label>
                             <input
                               type="date"
@@ -500,12 +537,14 @@ export function CalculoMargemView({
                                   entregaPrevista: event.target.value,
                                 })
                               }
-                              className="h-9 w-full px-2.5 text-sm border border-slate-300 rounded-md"
+                              className="h-9 w-full xl:max-w-[170px] px-2.5 text-sm border border-slate-300 rounded-md"
                             />
                           </div>
 
-                          <div>
-                            <label className="block text-xs text-slate-700 mb-1">Quantidade</label>
+                          <div className="w-full md:w-[130px]">
+                            <label className="block text-xs text-slate-700 mb-1">
+                              Quantidade <span className="text-rose-600">*</span>
+                            </label>
                             <input
                               type="number"
                               value={form.quantidade}
@@ -514,12 +553,14 @@ export function CalculoMargemView({
                                   quantidade: Number(event.target.value || 0),
                                 })
                               }
-                              className="h-9 w-full px-2.5 text-sm border border-slate-300 rounded-md"
+                              className="h-9 w-full xl:max-w-[130px] px-2.5 text-sm border border-slate-300 rounded-md"
                             />
                           </div>
 
-                          <div>
-                            <label className="block text-xs text-slate-700 mb-1">Preço</label>
+                          <div className="w-full md:w-[170px]">
+                            <label className="block text-xs text-slate-700 mb-1">
+                              Preço informado <span className="text-rose-600">*</span>
+                            </label>
                             <input
                               type="number"
                               value={form.preco}
@@ -528,133 +569,147 @@ export function CalculoMargemView({
                                   preco: Number(event.target.value || 0),
                                 })
                               }
-                              className="h-9 w-full px-2.5 text-sm border border-slate-300 rounded-md"
+                              className="h-9 w-full xl:max-w-[170px] px-2.5 text-sm border border-slate-300 rounded-md"
                             />
                           </div>
 
-                          <div>
+                          <div className="w-full md:w-[170px]">
                             <label className="block text-xs text-slate-700 mb-1">Preço meta</label>
                             <input
                               type="text"
                               value={toCurrency(custosFixosPorCodigo.precoMeta)}
                               readOnly
-                              className="h-9 w-full px-2.5 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-700"
+                              className="h-9 w-full xl:max-w-[170px] px-2.5 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-700"
                             />
                           </div>
 
-                          <div>
+                          <div className="w-full md:w-[170px]">
                             <label className="block text-xs text-slate-700 mb-1">Preço mínimo</label>
                             <input
                               type="text"
                               value={toCurrency(custosFixosPorCodigo.precoMinimo)}
                               readOnly
-                              className="h-9 w-full px-2.5 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-700"
+                              className="h-9 w-full xl:max-w-[170px] px-2.5 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-700"
                             />
                           </div>
 
-                          <div>
+                          <div className="w-full md:w-[170px]">
                             <label className="block text-xs text-slate-700 mb-1">Receita bruta</label>
                             <input
                               type="text"
                               value={toCurrency(receitaBruta)}
                               readOnly
-                              className="h-9 w-full px-2.5 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-700"
+                              className="h-9 w-full xl:max-w-[170px] px-2.5 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-700"
                             />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 xl:grid-cols-[220px_1fr] gap-2">
-                          <div className="rounded-md border border-slate-300 bg-slate-50 px-2 py-1.5 text-xs text-slate-600 overflow-hidden min-h-[104px]">
-                            <p className="truncate">Nenhum arquivo anexado</p>
-                            <button type="button" className="mt-2 text-slate-800 underline">
+                        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-3">
+                          <div className="rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 overflow-hidden min-h-[108px]">
+                            <p className="text-slate-700 font-medium">Anexo</p>
+                            <p className="truncate mt-1">Nenhum arquivo anexado</p>
+                            <button
+                              type="button"
+                              className="mt-2 text-slate-800 underline hover:text-slate-900"
+                            >
                               Carregar arquivo
                             </button>
                           </div>
 
-                          <textarea
-                            rows={4}
-                            value={form.observacao}
-                            onChange={(event) =>
-                              handleUpdateProdutoCotacao(produto.id, {
-                                observacao: event.target.value,
-                              })
-                            }
-                            placeholder="Observação"
-                            className="w-full px-2.5 py-2 text-sm border border-slate-300 rounded-md resize-none"
-                          />
+                          <div>
+                            <label className="block text-xs text-slate-700 mb-1">Observação</label>
+                            <textarea
+                              rows={4}
+                              value={form.observacao}
+                              onChange={(event) =>
+                                handleUpdateProdutoCotacao(produto.id, {
+                                  observacao: event.target.value,
+                                })
+                              }
+                              placeholder="Observação"
+                              className="w-full px-2.5 py-2 text-sm border border-slate-300 rounded-md resize-none bg-white"
+                            />
+                          </div>
                         </div>
-                      </div>
+                      </section>
 
-                      <div className="space-y-2 text-sm">
-                        <div className="grid grid-cols-[1fr_96px] gap-2 items-center">
-                          <span className="text-orange-600">Custo reposição:</span>
-                          <input
-                            type="text"
-                            value={toCurrency(custoReposicao)}
-                            readOnly
-                            className="h-8 px-2 text-sm border border-slate-200 bg-slate-50 rounded-md text-slate-700"
-                          />
+                      <section className="rounded-lg border border-slate-200 bg-white p-3 md:p-4 space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="text-sm text-slate-900">Resultado da análise</h3>
+                          <p className="text-xs text-slate-500">Receita líquida após ICMS: {toCurrency(receitaLiquidaAposIcms)}</p>
                         </div>
-                        <div className="text-xs text-slate-700">Margem: {margemReposicao.toFixed(1)}%</div>
 
-                        <div className="grid grid-cols-[1fr_96px] gap-2 items-center">
-                          <span className="text-orange-600">Custo médio:</span>
-                          <input
-                            type="text"
-                            value={toCurrency(custoMedio)}
-                            readOnly
-                            className="h-8 px-2 text-sm border border-slate-200 bg-slate-50 rounded-md text-slate-700"
-                          />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                          {[
+                            {
+                              titulo: "Custo reposição",
+                              valor: custoReposicao,
+                              margem: margemReposicao,
+                            },
+                            {
+                              titulo: "Custo médio",
+                              valor: custoMedio,
+                              margem: margemMedia,
+                            },
+                            {
+                              titulo: "Custo maior lote",
+                              valor: custoMaiorLote,
+                              margem: margemMaiorLote,
+                            },
+                            {
+                              titulo: "Custo simulado",
+                              valor: custoSimulado,
+                              margem: margemSimulada,
+                            },
+                          ].map((item) => (
+                            <div
+                              key={item.titulo}
+                              className={`rounded-lg border p-3 ${
+                                !form.codigo
+                                  ? "border-slate-200 bg-slate-50"
+                                  : aprovado
+                                    ? "border-emerald-200 bg-emerald-50"
+                                    : "border-amber-200 bg-amber-50"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs text-slate-600">{item.titulo}</p>
+                                <span className="text-[11px] font-medium text-slate-600">
+                                  {!form.codigo
+                                    ? "Pendente"
+                                    : aprovado
+                                      ? "Dentro da regra"
+                                      : "Abaixo do mínimo"}
+                                </span>
+                              </div>
+                              <p className="text-sm text-slate-900 mt-2">{toCurrency(item.valor)}</p>
+                              <p className="text-xs text-slate-700 mt-1">Margem: {item.margem.toFixed(1)}%</p>
+                            </div>
+                          ))}
                         </div>
-                        <div className="text-xs text-slate-700">Margem: {margemMedia.toFixed(1)}%</div>
+                      </section>
 
-                        <div className="grid grid-cols-[1fr_96px] gap-2 items-center">
-                          <span className="text-orange-600">Custo maior lote:</span>
-                          <input
-                            type="text"
-                            value={toCurrency(custoMaiorLote)}
-                            readOnly
-                            className="h-8 px-2 text-sm border border-slate-200 bg-slate-50 rounded-md text-slate-700"
-                          />
-                        </div>
-                        <div className="text-xs text-slate-700">Margem: {margemMaiorLote.toFixed(1)}%</div>
-
-                        <div className="grid grid-cols-[1fr_96px] gap-2 items-center">
-                          <span className="text-orange-600">Custo simulado:</span>
-                          <input
-                            type="text"
-                            value={toCurrency(custoSimulado)}
-                            readOnly
-                            className="h-8 px-2 text-sm border border-amber-300 bg-amber-50 rounded-md text-slate-700"
-                          />
-                        </div>
-                        <div className="text-xs text-slate-700">Margem: {margemSimulada.toFixed(1)}%</div>
-                      </div>
-
-                    </div>
-
-                    <div className="px-3 pb-3">
-                      <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+                      <section className="rounded-lg border border-slate-200 bg-slate-50 p-3 md:p-4">
                         <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                           <div>
                             <h3 className="text-sm text-slate-900">Plano de misturas</h3>
                             <p className="text-xs text-slate-500 mt-0.5">
-                              Simulação individual para este produto.
+                              Simulação individual opcional para este produto.
                             </p>
                           </div>
-                          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-                            <input
-                              type="checkbox"
+
+                          <div className="flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5">
+                            <Switch
                               checked={form.usarPlanoMisturas}
-                              onChange={(event) =>
+                              onCheckedChange={(checked) =>
                                 handleUpdateProdutoCotacao(produto.id, {
-                                  usarPlanoMisturas: event.target.checked,
+                                  usarPlanoMisturas: Boolean(checked),
                                 })
                               }
-                              className="h-4 w-4 rounded border-slate-300 text-slate-800 focus:ring-slate-500"
+                              aria-label="Ativar plano de misturas"
                             />
-                            Realizar plano de misturas
-                          </label>
+                            <span className="text-sm text-slate-700">Ativar plano de misturas</span>
+                          </div>
                         </div>
 
                         {!form.usarPlanoMisturas ? (
@@ -663,8 +718,8 @@ export function CalculoMargemView({
                           </div>
                         ) : (
                           <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-                              <div>
+                            <div className="flex flex-wrap gap-3">
+                              <div className="w-full md:w-[170px]">
                                 <label className="block text-xs text-slate-700 mb-1.5">Volume (toneladas)</label>
                                 <input
                                   type="number"
@@ -674,10 +729,10 @@ export function CalculoMargemView({
                                       volumeMistura: Number(event.target.value || 0),
                                     })
                                   }
-                                  className="w-full h-9 px-2.5 border border-slate-300 rounded-md"
+                                  className="w-full xl:max-w-[170px] h-9 px-2.5 border border-slate-300 rounded-md"
                                 />
                               </div>
-                              <div>
+                              <div className="w-full md:w-[190px]">
                                 <label className="block text-xs text-slate-700 mb-1.5">Preço por tonelada</label>
                                 <input
                                   type="number"
@@ -687,10 +742,10 @@ export function CalculoMargemView({
                                       precoPorTonelada: Number(event.target.value || 0),
                                     })
                                   }
-                                  className="w-full h-9 px-2.5 border border-slate-300 rounded-md"
+                                  className="w-full xl:max-w-[190px] h-9 px-2.5 border border-slate-300 rounded-md"
                                 />
                               </div>
-                              <div>
+                              <div className="w-full md:w-[170px]">
                                 <label className="block text-xs text-slate-700 mb-1.5">Frete por tonelada</label>
                                 <input
                                   type="number"
@@ -700,22 +755,22 @@ export function CalculoMargemView({
                                       fretePorTonelada: Number(event.target.value || 0),
                                     })
                                   }
-                                  className="w-full h-9 px-2.5 border border-slate-300 rounded-md"
+                                  className="w-full xl:max-w-[170px] h-9 px-2.5 border border-slate-300 rounded-md"
                                 />
                               </div>
-                              <div>
+                              <div className="w-full md:w-[140px]">
                                 <label className="block text-xs text-slate-700 mb-1.5">Alíquota total</label>
                                 <input
                                   type="text"
                                   value={`${aliquotaTotalImpostosMistura.toFixed(2)}%`}
                                   readOnly
-                                  className="w-full h-9 px-2.5 border border-slate-200 bg-white rounded-md text-slate-700"
+                                  className="w-full xl:max-w-[140px] h-9 px-2.5 border border-slate-200 bg-white rounded-md text-slate-700"
                                 />
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                              <div>
+                            <div className="flex flex-wrap gap-3">
+                              <div className="w-full md:w-[130px]">
                                 <label className="block text-xs text-slate-700 mb-1.5">ICMS (%)</label>
                                 <input
                                   type="number"
@@ -725,10 +780,10 @@ export function CalculoMargemView({
                                       icms: Number(event.target.value || 0),
                                     })
                                   }
-                                  className="w-full h-9 px-2.5 border border-slate-300 rounded-md"
+                                  className="w-full xl:max-w-[130px] h-9 px-2.5 border border-slate-300 rounded-md"
                                 />
                               </div>
-                              <div>
+                              <div className="w-full md:w-[130px]">
                                 <label className="block text-xs text-slate-700 mb-1.5">PIS (%)</label>
                                 <input
                                   type="number"
@@ -738,10 +793,10 @@ export function CalculoMargemView({
                                       pis: Number(event.target.value || 0),
                                     })
                                   }
-                                  className="w-full h-9 px-2.5 border border-slate-300 rounded-md"
+                                  className="w-full xl:max-w-[130px] h-9 px-2.5 border border-slate-300 rounded-md"
                                 />
                               </div>
-                              <div>
+                              <div className="w-full md:w-[130px]">
                                 <label className="block text-xs text-slate-700 mb-1.5">COFINS (%)</label>
                                 <input
                                   type="number"
@@ -751,7 +806,7 @@ export function CalculoMargemView({
                                       cofins: Number(event.target.value || 0),
                                     })
                                   }
-                                  className="w-full h-9 px-2.5 border border-slate-300 rounded-md"
+                                  className="w-full xl:max-w-[130px] h-9 px-2.5 border border-slate-300 rounded-md"
                                 />
                               </div>
                             </div>
@@ -773,6 +828,7 @@ export function CalculoMargemView({
                                     <input
                                       type="number"
                                       value={material.percentual}
+                                      aria-label={`Percentual de ${material.nome}`}
                                       onChange={(event) =>
                                         handleUpdateMaterialMisturaPorProduto(
                                           produto.id,
@@ -786,6 +842,7 @@ export function CalculoMargemView({
                                     <input
                                       type="number"
                                       value={material.custoUnitario}
+                                      aria-label={`Custo unitário de ${material.nome}`}
                                       onChange={(event) =>
                                         handleUpdateMaterialMisturaPorProduto(
                                           produto.id,
@@ -842,9 +899,10 @@ export function CalculoMargemView({
                             </div>
                           </div>
                         )}
+                      </section>
                       </div>
-                    </div>
-                  </div>
+                    )}
+                  </article>
                 );
               })}
             </div>
