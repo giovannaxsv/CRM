@@ -205,6 +205,7 @@ export default function App() {
               setOrigemRealizarContato("novo-contato");
               setActiveView("selecionar-itens-carteira");
             }}
+            onAbrirPlanoAcao={() => setActiveView("plano-acao")}
           />
         );
       case "selecionar-itens-carteira":

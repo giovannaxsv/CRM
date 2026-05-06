@@ -5,6 +5,7 @@ import {
   KanbanSquare,
   List,
   Search,
+  FileText,
 } from "lucide-react";
 import {
   getCotacaoApprovalMeta,
@@ -21,6 +22,13 @@ export type EtapaCotacao =
   | "POSTERGADO";
 
 type ModoVisualizacao = "lista" | "kanban";
+type FiltroRapido =
+  | "todas"
+  | "andamento"
+  | "aguardando-aprovacao"
+  | "aprovadas"
+  | "pedidos"
+  | "perdidas";
 
 export interface CotacaoResumo {
   id: number;
@@ -119,6 +127,9 @@ export const cotacoesMock: CotacaoResumo[] = [
     etapa: "PEDIDO FECHADO",
     statusAprovacao: "aprovado_manualmente",
     observacaoAprovacao: "Cotação aprovada manualmente e convertida em pedido.",
+    numeroPedido: "PED-2026-001",
+    dataPedido: "2026-03-25",
+    ocGerada: true,
   },
   {
     id: 6,
@@ -196,6 +207,51 @@ export const cotacoesMock: CotacaoResumo[] = [
     etapa: "PEDIDO FECHADO",
     statusAprovacao: "reprovado",
     observacaoAprovacao: "Cotação reprovada na análise.",
+    numeroPedido: "PED-2026-002",
+    dataPedido: "2026-03-30",
+    ocGerada: true,
+  },
+  {
+    id: 16,
+    codigo: "COT-2026-016",
+    cliente: "ALFA COMPONENTES INDUSTRIAIS LTDA",
+    responsavel: "Everton",
+    valor: 41850,
+    dataAtualizacao: "2026-04-08",
+    etapa: "PEDIDO FECHADO",
+    statusAprovacao: "aprovado_automaticamente",
+    observacaoAprovacao: "Cotação convertida em pedido após aprovação automática.",
+    numeroPedido: "PED-2026-003",
+    dataPedido: "2026-04-08",
+    ocGerada: true,
+  },
+  {
+    id: 17,
+    codigo: "COT-2026-017",
+    cliente: "ALUMIFER SOLUCOES METALICAS LTDA",
+    responsavel: "Keila",
+    valor: 29700,
+    dataAtualizacao: "2026-04-09",
+    etapa: "PEDIDO FECHADO",
+    statusAprovacao: "aprovado_manualmente",
+    observacaoAprovacao: "Pedido emitido após negociação final com o cliente.",
+    numeroPedido: "PED-2026-004",
+    dataPedido: "2026-04-09",
+    ocGerada: true,
+  },
+  {
+    id: 18,
+    codigo: "COT-2026-018",
+    cliente: "BETA INDUSTRIA DE PECAS LTDA",
+    responsavel: "Gorete",
+    valor: 56320,
+    dataAtualizacao: "2026-04-10",
+    etapa: "PEDIDO FECHADO",
+    statusAprovacao: "aprovado_manualmente",
+    observacaoAprovacao: "Cotação aprovada e convertida em pedido no fechamento comercial.",
+    numeroPedido: "PED-2026-005",
+    dataPedido: "2026-04-10",
+    ocGerada: true,
   },
   {
     id: 13,
@@ -230,6 +286,61 @@ export const cotacoesMock: CotacaoResumo[] = [
     statusAprovacao: "aguardando_aprovacao",
     observacaoAprovacao: "Cotação aguardando o parecer do gestor.",
   },
+  {
+    id: 19,
+    codigo: "COT-2026-019",
+    cliente: "BRASIL FERROS E METAIS LTDA",
+    responsavel: "Everton",
+    valor: 34800,
+    dataAtualizacao: "2026-04-11",
+    etapa: "AGUARDANDO APROVACAO",
+    statusAprovacao: "aguardando_aprovacao",
+    observacaoAprovacao: "Cotação aguardando aprovação após revisão de preço mínimo.",
+  },
+  {
+    id: 20,
+    codigo: "COT-2026-020",
+    cliente: "CBA COMPONENTES AUTOMOTIVOS LTDA",
+    responsavel: "Gorete",
+    valor: 46750,
+    dataAtualizacao: "2026-04-11",
+    etapa: "AGUARDANDO APROVACAO",
+    statusAprovacao: "aguardando_aprovacao",
+    observacaoAprovacao: "Cotação pendente de parecer do gestor comercial.",
+  },
+  {
+    id: 21,
+    codigo: "COT-2026-021",
+    cliente: "DYNAMIC METALURGICA LTDA",
+    responsavel: "Keila",
+    valor: 28950,
+    dataAtualizacao: "2026-04-12",
+    etapa: "AGUARDANDO APROVACAO",
+    statusAprovacao: "aguardando_aprovacao",
+    observacaoAprovacao: "Cotação enviada para validação de margem e frete.",
+  },
+  {
+    id: 22,
+    codigo: "COT-2026-022",
+    cliente: "ELEVATE INDUSTRIA DE PECAS LTDA",
+    responsavel: "Everton",
+    valor: 53300,
+    dataAtualizacao: "2026-04-12",
+    etapa: "AGUARDANDO APROVACAO",
+    statusAprovacao: "aguardando_aprovacao",
+    observacaoAprovacao: "Cotação aguardando decisão final do gestor.",
+  },
+  {
+    id: 23,
+    codigo: "COT-2026-023",
+    cliente: "FLEXA SOLUCOES INDUSTRIAIS LTDA",
+    responsavel: "Gorete",
+    valor: 61200,
+    dataAtualizacao: "2026-04-13",
+    etapa: "AGUARDANDO APROVACAO",
+    statusAprovacao: "aguardando_aprovacao",
+    observacaoAprovacao: "Cotação em fila para aprovação após conferência comercial.",
+  },
 ];
 
 function formatCurrency(value: number) {
@@ -243,6 +354,18 @@ function formatDate(value: string) {
   return new Date(`${value}T00:00:00`).toLocaleDateString("pt-BR");
 }
 
+function getNumeroPedidoMock(cotacao: CotacaoResumo) {
+  if (cotacao.etapa !== "PEDIDO FECHADO") {
+    return "Não convertido";
+  }
+
+  return cotacao.numeroPedido ?? `PED-2026-${String(cotacao.id).padStart(3, "0")}`;
+}
+
+function isPedidoGerado(cotacao: CotacaoResumo) {
+  return cotacao.etapa === "PEDIDO FECHADO";
+}
+
 export function ListaCotacoesView({
   onOpenCotacaoCompleta,
   cotacaoAtualizacoes,
@@ -250,9 +373,11 @@ export function ListaCotacoesView({
 }: ListaCotacoesViewProps) {
   const [modoVisualizacao, setModoVisualizacao] =
     useState<ModoVisualizacao>("lista");
+  const [filtroRapido, setFiltroRapido] = useState<FiltroRapido>("todas");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCotacao, setSelectedCotacao] =
     useState<CotacaoResumo | null>(null);
+  const [selectedPedido, setSelectedPedido] = useState<CotacaoResumo | null>(null);
 
   const cotacoesComEstado = useMemo(() => {
     return cotacoesMock.map((cotacao) => {
@@ -279,7 +404,7 @@ export function ListaCotacoesView({
     });
   }, [cotacaoAtualizacoes]);
 
-  const cotacoesFiltradas = useMemo(() => {
+  const cotacoesBaseFiltradas = useMemo(() => {
     const lowerSearch = searchTerm.toLowerCase();
     return cotacoesComEstado.filter((cotacao) => {
       const pertenceAoVendedor = !vendedorFiltro || cotacao.responsavel === vendedorFiltro;
@@ -300,12 +425,37 @@ export function ListaCotacoesView({
     });
   }, [cotacoesComEstado, searchTerm, vendedorFiltro]);
 
-  const totalCotacoes = cotacoesFiltradas.length;
-  const totalEmAndamento = cotacoesFiltradas.filter(
+  const cotacoesFiltradas = useMemo(() => {
+    return cotacoesBaseFiltradas.filter((cotacao) => {
+      switch (filtroRapido) {
+        case "andamento":
+          return cotacao.etapa !== "PEDIDO FECHADO" && cotacao.etapa !== "PERDIDA";
+        case "aguardando-aprovacao":
+          return cotacao.statusAprovacao === "aguardando_aprovacao";
+        case "aprovadas":
+          return (
+            cotacao.statusAprovacao === "aprovado_automaticamente" ||
+            cotacao.statusAprovacao === "aprovado_manualmente"
+          );
+        case "pedidos":
+          return cotacao.etapa === "PEDIDO FECHADO";
+        case "perdidas":
+          return cotacao.etapa === "PERDIDA";
+        case "todas":
+        default:
+          return true;
+      }
+    });
+  }, [cotacoesBaseFiltradas, filtroRapido]);
+
+  const totalCotacoes = cotacoesBaseFiltradas.length;
+  const totalEmAndamento = cotacoesBaseFiltradas.filter(
     (cotacao) =>
       cotacao.etapa !== "PEDIDO FECHADO" && cotacao.etapa !== "PERDIDA",
   ).length;
-  const valorTotal = cotacoesFiltradas.reduce(
+  const totalPedidos = cotacoesBaseFiltradas.filter((cotacao) => cotacao.etapa === "PEDIDO FECHADO").length;
+  const taxaConversao = totalCotacoes > 0 ? (totalPedidos / totalCotacoes) * 100 : 0;
+  const valorTotal = cotacoesBaseFiltradas.reduce(
     (accumulator, cotacao) => accumulator + cotacao.valor,
     0,
   );
@@ -351,7 +501,7 @@ export function ListaCotacoesView({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 mb-4">
           <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
             <p className="text-xs text-gray-500">Total de cotações</p>
             <p className="text-2xl text-gray-900 mt-1">{totalCotacoes}</p>
@@ -366,6 +516,14 @@ export function ListaCotacoesView({
               {formatCurrency(valorTotal)}
             </p>
           </div>
+          <div className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3">
+            <p className="text-xs text-sky-700">Pedidos gerados</p>
+            <p className="text-2xl text-sky-800 mt-1">{totalPedidos}</p>
+          </div>
+          <div className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-3">
+            <p className="text-xs text-violet-700">Taxa de conversão</p>
+            <p className="text-2xl text-violet-800 mt-1">{taxaConversao.toFixed(1)}%</p>
+          </div>
         </div>
 
         <div className="relative">
@@ -377,6 +535,30 @@ export function ListaCotacoesView({
             placeholder="Buscar por código, cliente, responsável ou etapa..."
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
           />
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {[
+            { id: "todas", label: "Todas" },
+            { id: "andamento", label: "Em andamento" },
+            { id: "aguardando-aprovacao", label: "Aguardando aprovação" },
+            { id: "aprovadas", label: "Aprovadas" },
+            { id: "pedidos", label: "Pedidos" },
+            { id: "perdidas", label: "Perdidas" },
+          ].map((chip) => (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={() => setFiltroRapido(chip.id as FiltroRapido)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                filtroRapido === chip.id
+                  ? "border-slate-800 bg-slate-800 text-white"
+                  : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              {chip.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -391,6 +573,7 @@ export function ListaCotacoesView({
                   <th className="px-4 py-3 text-left text-xs text-gray-600">Responsável</th>
                   <th className="px-4 py-3 text-left text-xs text-gray-600">Aprovação</th>
                   <th className="px-4 py-3 text-left text-xs text-gray-600">Etapa</th>
+                  <th className="px-4 py-3 text-left text-xs text-gray-600">Pedido</th>
                   <th className="px-4 py-3 text-left text-xs text-gray-600">Valor</th>
                   <th className="px-4 py-3 text-left text-xs text-gray-600">Atualizado em</th>
                 </tr>
@@ -399,7 +582,7 @@ export function ListaCotacoesView({
                 {cotacoesFiltradas.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={8}
                       className="px-4 py-6 text-sm text-gray-500 text-center"
                     >
                       Nenhuma cotação encontrada para o filtro informado.
@@ -410,9 +593,18 @@ export function ListaCotacoesView({
                     <tr
                       key={cotacao.id}
                       onClick={() => setSelectedCotacao(cotacao)}
-                      className="hover:bg-gray-50 cursor-pointer"
+                      className={`cursor-pointer transition-colors ${
+                        isPedidoGerado(cotacao)
+                          ? "bg-sky-50 hover:bg-sky-100"
+                          : "hover:bg-gray-50"
+                      }`}
                     >
-                      <td className="px-4 py-3 text-sm text-gray-900">{cotacao.codigo}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        <div className="flex items-center gap-2">
+                          {isPedidoGerado(cotacao) && <FileText className="h-4 w-4 text-sky-600 shrink-0" />}
+                          <span>{cotacao.codigo}</span>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-sm text-gray-900">{cotacao.cliente}</td>
                       <td className="px-4 py-3 text-sm text-gray-700">{cotacao.responsavel}</td>
                       <td className="px-4 py-3 text-xs">
@@ -422,7 +614,21 @@ export function ListaCotacoesView({
                           {getCotacaoApprovalMeta(cotacao.statusAprovacao).label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-700">{cotacao.etapa}</td>
+                      <td className="px-4 py-3 text-xs text-slate-700">
+                        <div className="flex flex-col gap-2">
+                          <span>{cotacao.etapa}</span>
+                          {isPedidoGerado(cotacao) && (
+                            <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-800">
+                              Pedido gerado
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        <div className="flex items-center gap-2">
+                          <span>{getNumeroPedidoMock(cotacao)}</span>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-sm text-gray-900">{formatCurrency(cotacao.valor)}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{formatDate(cotacao.dataAtualizacao)}</td>
                     </tr>
@@ -437,14 +643,26 @@ export function ListaCotacoesView({
               const itensEtapa = cotacoesFiltradas.filter(
                 (cotacao) => cotacao.etapa === etapa,
               );
+              const etapaKanban = etapa === "PEDIDO FECHADO" ? "PEDIDOS GERADOS" : etapa;
 
               return (
                 <div
                   key={etapa}
-                  className="rounded-xl border border-slate-200 bg-white p-3 flex flex-col min-h-52"
+                  className={`rounded-xl border p-3 flex flex-col min-h-52 transition-colors ${
+                    etapa === "PEDIDO FECHADO"
+                      ? "border-sky-200 bg-sky-50"
+                      : "border-slate-200 bg-white"
+                  }`}
                 >
                   <div className="mb-3 pb-2 border-b border-slate-200">
-                    <p className="text-xs text-slate-700">{etapa}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs text-slate-700">{etapaKanban}</p>
+                      {etapa === "PEDIDO FECHADO" && (
+                        <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-800">
+                          Pedido gerado
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-500 mt-1">
                       {itensEtapa.length} item(ns)
                     </p>
@@ -460,25 +678,44 @@ export function ListaCotacoesView({
                         <article
                           key={cotacao.id}
                           onClick={() => setSelectedCotacao(cotacao)}
-                          className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+                          className={`rounded-lg border px-3 py-2 transition-colors ${
+                            etapa === "PEDIDO FECHADO"
+                              ? "border-sky-200 bg-white"
+                              : "border-slate-200 bg-slate-50"
+                          }`}
                         >
-                          <span
-                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${getCotacaoApprovalMeta(cotacao.statusAprovacao).className}`}
-                          >
-                            {getCotacaoApprovalMeta(cotacao.statusAprovacao).label}
-                          </span>
-                          <p className="text-xs text-slate-500">{cotacao.codigo}</p>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <span
+                                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${getCotacaoApprovalMeta(cotacao.statusAprovacao).className}`}
+                              >
+                                {getCotacaoApprovalMeta(cotacao.statusAprovacao).label}
+                              </span>
+                              {etapa === "PEDIDO FECHADO" && (
+                                <span className="ml-2 inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-800">
+                                  Pedido gerado
+                                </span>
+                              )}
+                              <p className="text-xs text-slate-500 mt-2">{cotacao.codigo}</p>
+                            </div>
+                          </div>
                           <p className="text-sm text-slate-900 mt-1">{cotacao.cliente}</p>
                           <p className="text-xs text-slate-600 mt-1">Responsável: {cotacao.responsavel}</p>
                           <p className="text-xs text-slate-600 mt-1">
                             {formatCurrency(cotacao.valor)}
                           </p>
+                          {etapa === "PEDIDO FECHADO" && (
+                            <p className="mt-2 text-xs text-slate-600">
+                              Pedido: {getNumeroPedidoMock(cotacao)}
+                            </p>
+                          )}
                         </article>
                       ))
                     )}
                   </div>
                 </div>
               );
+
             })}
           </section>
         )}
@@ -544,6 +781,27 @@ export function ListaCotacoesView({
                 </div>
               </section>
 
+              {isPedidoGerado(selectedCotacao) && (
+                <section className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs text-sky-700">Pedido gerado</p>
+                      <p className="text-sm text-slate-700 mt-1">
+                        Número do pedido: {getNumeroPedidoMock(selectedCotacao)}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPedido(selectedCotacao)}
+                      className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      <FileText className="h-4 w-4 text-sky-600" />
+                      Ver pedido
+                    </button>
+                  </div>
+                </section>
+              )}
+
               <section className="rounded-lg border border-slate-200 px-4 py-3">
                 <p className="text-xs text-slate-500">Resumo comercial</p>
                 <p className="text-sm text-slate-700 mt-2 leading-relaxed">
@@ -565,6 +823,82 @@ export function ListaCotacoesView({
                   Ver cotação completa
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedPedido && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/40 p-4 flex items-center justify-center"
+          onClick={() => setSelectedPedido(null)}
+        >
+          <div
+            className="w-full max-w-lg overflow-auto rounded-xl border border-slate-200 bg-white shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="border-b border-slate-200 px-5 py-4 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs text-slate-500">Pedido gerado</p>
+                <h3 className="text-lg text-slate-900 mt-1 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-sky-600" />
+                  {getNumeroPedidoMock(selectedPedido)}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedPedido(null)}
+                className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-slate-300 hover:bg-slate-100"
+                aria-label="Fechar pedido"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 text-sm">
+              <section className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-xs text-slate-500">Observação</p>
+                <p className="text-sm text-slate-700 mt-1">Pedido gerado a partir da cotação aprovada.</p>
+              </section>
+
+              <section className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="rounded-lg border border-slate-200 px-4 py-3">
+                  <p className="text-xs text-slate-500">Código da cotação</p>
+                  <p className="text-slate-900 mt-1">{selectedPedido.codigo}</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 px-4 py-3">
+                  <p className="text-xs text-slate-500">Número do pedido</p>
+                  <p className="text-slate-900 mt-1">{getNumeroPedidoMock(selectedPedido)}</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 px-4 py-3">
+                  <p className="text-xs text-slate-500">Cliente</p>
+                  <p className="text-slate-900 mt-1">{selectedPedido.cliente}</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 px-4 py-3">
+                  <p className="text-xs text-slate-500">Responsável</p>
+                  <p className="text-slate-900 mt-1">{selectedPedido.responsavel}</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 px-4 py-3">
+                  <p className="text-xs text-slate-500">Valor final</p>
+                  <p className="text-slate-900 mt-1">{formatCurrency(selectedPedido.valor)}</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 px-4 py-3">
+                  <p className="text-xs text-slate-500">Data de conversão</p>
+                  <p className="text-slate-900 mt-1">{formatDate(selectedPedido.dataAtualizacao)}</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 px-4 py-3 md:col-span-2">
+                  <p className="text-xs text-slate-500">Status do pedido</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-800">
+                      Pedido gerado
+                    </span>
+                    <span
+                      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${getCotacaoApprovalMeta(selectedPedido.statusAprovacao).className}`}
+                    >
+                      {getCotacaoApprovalMeta(selectedPedido.statusAprovacao).label}
+                    </span>
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
         </div>
